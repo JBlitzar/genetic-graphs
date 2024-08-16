@@ -111,12 +111,40 @@ class SiLU(ImageModule):
     
         self.block = nn.SiLU()
 
+class ELU(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    
+        self.block = nn.ELU()
+
+class GELU(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    
+        self.block = nn.GELU()
+class SELU(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    
+        self.block = nn.SELU()
+
 class Dropout(ImageModule):
     def __init__(self, name):
         super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
 
     
         self.block = nn.Dropout()
+
+class BatchNorm(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    def init_block(self):
+        
+        self.block = nn.BatchNorm2d(self.realShape[0])
 
 
 class SummationModule(CombinationModule):
