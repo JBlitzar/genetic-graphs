@@ -34,7 +34,7 @@ def rand_of_transform(transform: Tuple[int,int,int]):
 
 
 def mutate(dag: ModuleDag):
-    mutation_possibilities = ["sameTransformation","skip","downup","cull","replaceSame"]
+    mutation_possibilities = ["sameTransformation","skip","downup","smallbig","inout","cull","replaceSame","noop"]
 
     mutationType = random.choice(mutation_possibilities)
 
@@ -47,11 +47,21 @@ def mutate(dag: ModuleDag):
             dag.insertBetween(rand_of_transform((1,1,1)),u,v)
         case "skip":
             pass
+        case "smallbig":
+            u,v = dag.randomEdge()
+            dag.insertChainBetween([rand_of_transform((1,0.5,0.5)),rand_of_transform((1,2,2))],u,v)
+        case "inout":
+            u,v = dag.randomEdge()
+            dag.insertChainBetween([rand_of_transform((2,1,1)),rand_of_transform((0.5,1,1))],u,v)
         case "downup":
-            pass
+            u,v = dag.randomEdge()
+            dag.insertChainBetween([rand_of_transform((2,0.5,0.5)),rand_of_transform((0.5,2,2))],u,v)
         case "cull":
-            pass
+            pass #TODO: implement
         case "replaceSame":
+            n = dag.get_random_node()
+            dag.replace_node(n.name, rand_of_transform(n.shape_transform))
+        case "noop":
             pass
 
 

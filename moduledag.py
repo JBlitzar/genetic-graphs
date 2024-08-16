@@ -175,6 +175,10 @@ class ModuleDag(Module):
         print(get_child_attributes(module))
         self.graph.add_node(module.name, module_type=module.__class__)
         self.modules[module.name] = module
+
+    def remove_module(self, module):
+        self.graph.remove_node(module.name)
+        self.modules.pop(module.name, None)
     
     def add_connection(self, from_module, to_module):
         if from_module not in self.modules or to_module not in self.modules:
@@ -290,11 +294,59 @@ class ModuleDag(Module):
         return random.choice(list(self.graph.edges))
 
     def insertBetween(self,new,u,v):
+        if new not in self.graph:
+            self.add_module(new)
         self.graph.remove_edge(u, v)
 
 
         self.graph.add_edge(u, new)
         self.graph.add_edge(new, v)
+
+    def insertChainBetween(self, new_nodes, u, v):
+        if not new_nodes:
+            raise ValueError("The list of new nodes cannot be empty.")
+        
+        for node in new_nodes:
+            if node not in self.graph:
+                self.graph.add_node(node)
+        
+
+        self.graph.remove_edge(u, v)
+        
+        self.graph.add_edge(u, new_nodes[0])
+        
+        for i in range(len(new_nodes) - 1):
+            self.graph.add_edge(new_nodes[i], new_nodes[i + 1])
+        
+        self.graph.add_edge(new_nodes[-1], v)
+
+    def get_random_node(self):
+        nodes = list(self.graph.nodes)
+        return self.modules[random.choice(nodes)]
+    
+    def replace_node(self, old_node, new_node):
+        if old_node not in self.graph:
+            raise ValueError(f"Old node {old_node} not found in the graph.")
+
+        if new_node in self.graph:
+            raise ValueError(f"New node {new_node} already exists in the graph.")
+
+
+        predecessors = list(self.graph.predecessors(old_node))
+        successors = list(self.graph.successors(old_node))
+
+
+
+        self.remove_module(old_node)
+
+
+        self.add_module(new_node)
+
+        for pred in predecessors:
+            self.graph.add_edge(pred, new_node)
+        
+        for succ in successors:
+            self.graph.add_edge(new_node, succ)
 
 
 
