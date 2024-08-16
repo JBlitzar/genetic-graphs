@@ -10,6 +10,14 @@ class SingleConv(ImageModule):
         channels = self.realShape[0]
         self.block = nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1)
 
+class ConvTranspose(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    def init_block(self):
+        channels = self.realShape[0]
+        self.block = nn.ConvTranspose2d(channels,channels,kernel_size=4,stride=2,padding=1,output_padding=0)
+
 class ConvSandwich(ImageModule):
     def __init__(self, name):
         super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
@@ -73,6 +81,15 @@ class ReLU(ImageModule):
     
         self.block = nn.ReLU()
 
+class LeakyReLU(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    
+        self.block = nn.LeakyReLU()
+
+
+
 class Tanh(ImageModule):
     def __init__(self, name):
         super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
@@ -93,6 +110,14 @@ class SiLU(ImageModule):
 
     
         self.block = nn.SiLU()
+
+class Dropout(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    
+        self.block = nn.Dropout()
+
 
 class SummationModule(CombinationModule):
     def __init__(self, name):
