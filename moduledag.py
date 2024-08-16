@@ -2,6 +2,9 @@ import networkx as nx
 import json
 import torch.nn as nn
 import torch
+import random
+import inspect
+
 
 class FunctionalToClass(nn.Module):
     def __init__(self, function, *args, **kwargs) -> None:
@@ -155,7 +158,22 @@ class ModuleDag(Module):
         self.modules = {}
     
     def add_module(self, module):
-        self.graph.add_node(module.name, num_inputs=module.num_inputs, num_outputs=module.num_outputs)
+        def get_child_attributes(child_class):
+
+            child_attrs = set(dir(child_class))
+
+
+            parent_attrs = set()
+            parent_attrs = set()
+            for cls in inspect.getmro(type(child_class)):
+                if cls is not type(child_class):
+                    parent_attrs.update(dir(cls))
+                    child_specific_attrs = child_attrs - parent_attrs
+
+            return child_specific_attrs
+        
+        print(get_child_attributes(module))
+        self.graph.add_node(module.name, module_type=module.__class__)
         self.modules[module.name] = module
     
     def add_connection(self, from_module, to_module):
@@ -223,7 +241,7 @@ class ModuleDag(Module):
         for node in self.graph.nodes(data=True):
             module_name = node[0]
             module_data = node[1]
-            module = Module(module_name, module_data['num_inputs'], module_data['num_outputs'])
+            module = module_data["module_class"](module_name)
             self.modules[module_name] = module
         
 
@@ -267,6 +285,16 @@ class ModuleDag(Module):
         final_module = "OutputModule"
         return outputs.get(final_module, [])
     
+
+    def randomEdge(self):
+        return random.choice(list(self.graph.edges))
+
+    def insertBetween(self,new,u,v):
+        self.graph.remove_edge(u, v)
+
+
+        self.graph.add_edge(u, new)
+        self.graph.add_edge(new, v)
 
 
 
