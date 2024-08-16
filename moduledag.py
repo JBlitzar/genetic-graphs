@@ -10,20 +10,20 @@ class Module(nn.Module):
         self.input_connections = 0
         self.output_connections = 0
 
-    def can_add_input(self, other):
+    def can_add_input(self):
         return self.input_connections < self.num_inputs
     
-    def can_add_output(self, other):
+    def can_add_output(self):
         return self.output_connections < self.num_outputs
     
     def add_input_connection(self, other):
-        if self.can_add_input(other):
+        if self.can_add_input():
             self.input_connections += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of inputs.")
 
     def add_output_connection(self, other):
-        if self.can_add_output(other):
+        if self.can_add_output():
             self.output_connections += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
@@ -39,7 +39,7 @@ class Module(nn.Module):
         output = sum(inputs) # Filler function: Just sum the inputs for now
         
         return [output]# * self.num_outputs
-    
+
 
 class ImageModule(Module):
     def __init__(self, name, shapeTransform):
@@ -57,20 +57,16 @@ class ImageModule(Module):
         self.block = nn.Identity()
 
 
-    def can_add_input(self, other):
-        return self.input_connections < self.num_inputs
-    
-    def can_add_output(self, other):
-        return self.output_connections < self.num_outputs
+
     
     def add_input_connection(self, other):
-        if self.can_add_input(other):
+        if self.can_add_input():
             self.input_connections += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of inputs.")
 
     def add_output_connection(self, other):
-        if self.can_add_output(other):
+        if self.can_add_output():
             self.output_connections += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
@@ -83,7 +79,6 @@ class ImageModule(Module):
 
 
         return [self.block(x)]
-
 
 
 
@@ -183,6 +178,7 @@ class ModuleDag(Module):
         for module_name in nx.topological_sort(self.graph):
             module = self.modules[module_name]
             input_data = inputs.get(module_name, [])
+            print(inputs)
             print(input_data, module_name)
 
             output_data = module.forward(input_data)
@@ -194,7 +190,10 @@ class ModuleDag(Module):
                 if successor in inputs:
                     inputs[successor].extend(output_data)
                 else:
-                    inputs[successor] = output_data
+                    inputs[successor] = list(output_data)
+
+                print(f"{successor}'s inputs are set to {inputs[successor]}")
+                
         
 
         final_module = "OutputModule"
@@ -208,14 +207,17 @@ if __name__ == "__main__":
     mg = ModuleDag("TestGraph")
 
 
-    mg.add_module(Module("InputModule", num_inputs=1, num_outputs=1))
+    mg.add_module(Module("InputModule", num_inputs=1, num_outputs=2))
     mg.add_module(Module("ProcessModuleA", num_inputs=1, num_outputs=2))
     mg.add_module(Module("ProcessModuleB", num_inputs=1, num_outputs=1))
-    mg.add_module(Module("OutputModule", num_inputs=2, num_outputs=1))
+    mg.add_module(Module("ProcessModuleC", num_inputs=1, num_outputs=1))
+    mg.add_module(Module("OutputModule", num_inputs=3, num_outputs=1))
 
 
     mg.add_connection("InputModule", "ProcessModuleA")
+    mg.add_connection("InputModule", "ProcessModuleC")
     mg.add_connection("ProcessModuleA", "ProcessModuleB")
+    mg.add_connection("ProcessModuleC", "OutputModule")
     mg.add_connection("ProcessModuleB", "OutputModule")
     mg.add_connection("ProcessModuleA", "OutputModule")
 
