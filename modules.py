@@ -10,6 +10,35 @@ class SingleConv(ImageModule):
         channels = self.realShape[0]
         self.block = nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1)
 
+class ConvSandwich(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    def init_block(self):
+        channels = self.realShape[0]
+        self.block = nn.Sequential(
+            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.ReLU(),
+            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.ReLU(),
+        )
+
+class ConvSandwichQuadruple(ImageModule):
+    def __init__(self, name):
+        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+
+    def init_block(self):
+        channels = self.realShape[0]
+        self.block = nn.Sequential(
+            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.ReLU(),
+            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.ReLU(),
+            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.ReLU(),
+            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.ReLU(),
+        )
 
 
 class DeeperConv(ImageModule):
