@@ -1,6 +1,6 @@
-from moduledag import Module, ImageModule
+from moduledag import Module, ImageModule, CombinationModule, FunctionalToClass
 import torch.nn as nn
-
+import torch
 
 class SingleConv(ImageModule):
     def __init__(self, name):
@@ -93,3 +93,10 @@ class SiLU(ImageModule):
 
     
         self.block = nn.SiLU()
+
+class SummationModule(CombinationModule):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def init_block(self):
+        self.block = FunctionalToClass(lambda tensors: torch.stack(tensors).sum(dim=0))

@@ -1,7 +1,15 @@
 import networkx as nx
 import json
 import torch.nn as nn
+import torch
 
+class FunctionalToClass(nn.Module):
+    def __init__(self, function, *args, **kwargs) -> None:
+        self.function = function
+        super().__init__(*args, **kwargs)
+    def forward(self, x):
+        return self.function(x)
+    
 class Module(nn.Module):
     def __init__(self, name, num_inputs, num_outputs):
         self.name = name
@@ -27,6 +35,9 @@ class Module(nn.Module):
             self.output_connections += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
+        
+    def validate_inout(self):
+        return self.input_connections == self.output_connections and self.output_connections == self.num_outputs
     
 
     def forward(self, inputs):
@@ -56,7 +67,9 @@ class ImageModule(Module):
         # self.realShape is available
         self.block = nn.Identity()
 
-
+    
+    def can_add_output(self):
+        return True
 
     
     def add_input_connection(self, other):
@@ -68,6 +81,7 @@ class ImageModule(Module):
     def add_output_connection(self, other):
         if self.can_add_output():
             self.output_connections += 1
+            self.num_outputs += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
         other.realShape = self.get_output_shape()
@@ -76,6 +90,49 @@ class ImageModule(Module):
 
     def forward(self, inputs):
         x = inputs[0]
+
+
+        return [self.block(x)]
+
+
+class CombinationModule(Module):
+    def __init__(self, name):
+        super().__init__(name, 1, 1)
+
+        self.realShape = None
+        self.shapeTransform = (1,1,1)
+
+
+    def get_output_shape(self):
+        return tuple(a * b for a, b in zip(self.realShape, self.shapeTransform))
+
+    def init_block(self):
+        # self.realShape is available
+        self.block = FunctionalToClass(lambda tensors: torch.stack(tensors).sum(dim=0))
+
+    
+    def can_add_output(self):
+        return True
+
+    
+    def add_input_connection(self, other):
+        if self.can_add_input():
+            self.input_connections += 1
+        else:
+            raise ValueError(f"{self.name} has reached its maximum number of inputs.")
+
+    def add_output_connection(self, other):
+        if self.can_add_output():
+            self.output_connections += 1
+            self.num_outputs += 1
+        else:
+            raise ValueError(f"{self.name} has reached its maximum number of outputs.")
+        other.realShape = self.get_output_shape()
+        other.init_block()
+    
+
+    def forward(self, inputs):
+        x = tuple(inputs)
 
 
         return [self.block(x)]
@@ -136,10 +193,8 @@ class ModuleDag(Module):
             
             # Validate all other modules normally
             else:
-                if module.input_connections != module.num_inputs:
-                    raise ValueError(f"{module_name} does not have the correct number of input connections.")
-                if module.output_connections != module.num_outputs:
-                    raise ValueError(f"{module_name} does not have the correct number of output connections.")
+                if not module.validate_inout():
+                    raise ValueError(f"{module_name} does not have the correct number of input/output connections.")
         
 
     def serialize_to_json(self):
