@@ -2,150 +2,165 @@ from moduledag import Module, ImageModule, CombinationModule, FunctionalToClass
 import torch.nn as nn
 import torch
 
-class SingleConv(ImageModule):
+class ConvBack(ImageModule):
+    shape_transform = (0.5, 1, 1)
+
     def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+        super().__init__(name, self.shape_transform)
 
     def init_block(self):
         channels = self.realShape[0]
-        self.block = nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1)
+        self.block = nn.Conv2d(channels, channels // 2, kernel_size=3, stride=1, padding=1)
+
+class ConvDown(ImageModule):
+    shape_transform = (1, 0.5, 0.5)
+
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
+
+    def init_block(self):
+        channels = self.realShape[0]
+        self.block = nn.Conv2d(channels, channels, kernel_size=4, stride=2, padding=1)
 
 class ConvTranspose(ImageModule):
+    shape_transform = (1, 2, 2)
+
     def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+        super().__init__(name, self.shape_transform)
 
     def init_block(self):
         channels = self.realShape[0]
-        self.block = nn.ConvTranspose2d(channels,channels,kernel_size=4,stride=2,padding=1,output_padding=0)
+        self.block = nn.ConvTranspose2d(channels, channels, kernel_size=4, stride=2, padding=1, output_padding=0)
 
 class ConvSandwich(ImageModule):
+    shape_transform = (1, 1, 1)
+
     def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+        super().__init__(name, self.shape_transform)
 
     def init_block(self):
         channels = self.realShape[0]
         self.block = nn.Sequential(
-            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
         )
 
 class ConvSandwichQuadruple(ImageModule):
+    shape_transform = (1, 1, 1)
+
     def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+        super().__init__(name, self.shape_transform)
 
     def init_block(self):
         channels = self.realShape[0]
         self.block = nn.Sequential(
-            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(channels,channels,kernel_size=3,stride=1,padding=1),
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
         )
 
-
 class DeeperConv(ImageModule):
+    shape_transform = (2, 0.5, 0.5)
+
     def __init__(self, name):
-        super().__init__(name, (2,0.5,0.5)) # deeper, smaller
+        super().__init__(name, self.shape_transform)
 
     def init_block(self):
         channels = self.realShape[0]
-        self.block = nn.Conv2d(channels,channels * 2,kernel_size=4,stride=2,padding=1)
+        self.block = nn.Conv2d(channels, channels * 2, kernel_size=4, stride=2, padding=1)
 
 class Upsample(ImageModule):
+    shape_transform = (1, 2, 2)
+
     def __init__(self, name):
-        super().__init__(name, (1,2,2)) # x,y *= 2
-
-    
-        self.block = nn.Upsample(scale_factor=2,mode="nearest")
-
-
+        super().__init__(name, self.shape_transform)
+        self.block = nn.Upsample(scale_factor=2, mode="nearest")
 
 class MaxPool(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,0.5,0.5)) # x,y /= 2
+    shape_transform = (1, 0.5, 0.5)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.MaxPool2d(2)
 
-
 class ReLU(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.ReLU()
 
 class LeakyReLU(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.LeakyReLU()
 
-
-
 class Tanh(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.Tanh()
 
 class Sigmoid(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.Sigmoid()
 
 class SiLU(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.SiLU()
 
 class ELU(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.ELU()
 
 class GELU(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.GELU()
-class SELU(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
 
-    
+class SELU(ImageModule):
+    shape_transform = (1, 1, 1)
+
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.SELU()
 
 class Dropout(ImageModule):
-    def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+    shape_transform = (1, 1, 1)
 
-    
+    def __init__(self, name):
+        super().__init__(name, self.shape_transform)
         self.block = nn.Dropout()
 
 class BatchNorm(ImageModule):
+    shape_transform = (1, 1, 1)
+
     def __init__(self, name):
-        super().__init__(name, (1,1,1)) # Channels,x,y stay the same.
+        super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        
         self.block = nn.BatchNorm2d(self.realShape[0])
-
 
 class SummationModule(CombinationModule):
     def __init__(self, name):
