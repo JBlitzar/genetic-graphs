@@ -163,6 +163,7 @@ class BatchNorm(ImageModule):
         self.block = nn.BatchNorm2d(self.realShape[0])
 
 class SummationModule(CombinationModule):
+    shape_transform = "comb"
     def __init__(self, name):
         super().__init__(name)
 
