@@ -320,6 +320,11 @@ class ModuleDag(Module):
         
         self.graph.add_edge(new_nodes[-1], v)
 
+    def has_one_predecessor(self,node):
+        predecessors = list(self.graph.predecessors(node))
+        
+        return len(predecessors) == 1
+
     def get_random_node(self):
         nodes = list(self.graph.nodes)
         return self.modules[random.choice(nodes)]
@@ -347,6 +352,24 @@ class ModuleDag(Module):
         
         for succ in successors:
             self.graph.add_edge(new_node, succ)
+
+    def remove_node_and_link(self, node):
+
+        predecessors = list(self.graph.predecessors(node))
+        successors = list(self.graph.successors(node))
+
+
+        if len(predecessors) > 1:
+            raise ValueError(f"Node {node} has more than one predecessor.")
+
+
+        if predecessors:
+            pred = predecessors[0]
+            for succ in successors:
+                self.graph.add_edge(pred, succ)
+
+
+        self.remove_module(self.modules[node])
 
 
 

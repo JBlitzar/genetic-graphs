@@ -57,7 +57,17 @@ def mutate(dag: ModuleDag):
             u,v = dag.randomEdge()
             dag.insertChainBetween([rand_of_transform((2,0.5,0.5)),rand_of_transform((0.5,2,2))],u,v)
         case "cull":
-            pass #TODO: implement
+            candidate = None
+
+
+            while True:
+                candidate = dag.get_random_node()
+                if dag.has_one_predecessor(candidate.name):
+                    break
+
+            
+            dag.remove_node_and_link(candidate.name)
+
         case "replaceSame":
             n = dag.get_random_node()
             dag.replace_node(n.name, rand_of_transform(n.shape_transform))
