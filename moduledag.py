@@ -10,20 +10,20 @@ class Module(nn.Module):
         self.input_connections = 0
         self.output_connections = 0
 
-    def can_add_input(self):
+    def can_add_input(self, other):
         return self.input_connections < self.num_inputs
     
-    def can_add_output(self):
+    def can_add_output(self, other):
         return self.output_connections < self.num_outputs
     
-    def add_input_connection(self):
-        if self.can_add_input():
+    def add_input_connection(self, other):
+        if self.can_add_input(other):
             self.input_connections += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of inputs.")
 
-    def add_output_connection(self):
-        if self.can_add_output():
+    def add_output_connection(self, other):
+        if self.can_add_output(other):
             self.output_connections += 1
         else:
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
@@ -40,6 +40,49 @@ class Module(nn.Module):
         
         return [output]# * self.num_outputs
     
+
+class ImageModule(Module):
+    def __init__(self, name, shapeTransform):
+        super().__init__(name, 1, 1)
+
+        self.realShape = None
+        self.shapeTransform = shapeTransform
+
+
+    def get_output_shape(self):
+        return tuple(a * b for a, b in zip(self.realShape, self.shapeTransform))
+
+    def init_block(self):
+        # self.realShape is available
+        self.block = nn.Identity()
+
+
+    def can_add_input(self, other):
+        return self.input_connections < self.num_inputs
+    
+    def can_add_output(self, other):
+        return self.output_connections < self.num_outputs
+    
+    def add_input_connection(self, other):
+        if self.can_add_input(other):
+            self.input_connections += 1
+        else:
+            raise ValueError(f"{self.name} has reached its maximum number of inputs.")
+
+    def add_output_connection(self, other):
+        if self.can_add_output(other):
+            self.output_connections += 1
+        else:
+            raise ValueError(f"{self.name} has reached its maximum number of outputs.")
+        other.realShape = self.get_output_shape()
+        other.init_block()
+    
+
+    def forward(self, inputs):
+        x = inputs[0]
+
+
+        return [self.block(x)]
 
 
 
@@ -80,8 +123,8 @@ class ModuleDag(Module):
             raise ValueError("Adding this connection creates a cycle, which is not allowed.")
         
 
-        from_mod.add_output_connection()
-        to_mod.add_input_connection()
+        from_mod.add_output_connection(to_mod)
+        to_mod.add_input_connection(from_mod)
     
 
     def validate_graph(self):
