@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch
 import random
 import inspect
-
+from display import display_graph
 
 class FunctionalToClass(nn.Module):
     def __init__(self, function, *args, **kwargs) -> None:
@@ -45,7 +45,7 @@ class Module(nn.Module):
     
 
     def forward(self, inputs):
-        print(f"{self.name} recieving inputs {inputs}")
+        # print(f"{self.name} recieving inputs {inputs}")
         
        
         if len(inputs) != self.num_inputs:
@@ -61,7 +61,12 @@ class ImageModule(Module):
         super().__init__(name, 1, 1)
 
         self.realShape = None
+        if len(shapeTransform) == len((1,1,1)):
+            shapeTransform = [1] + list(shapeTransform)
         self.shapeTransform = shapeTransform
+
+    def setShape(self,shape):
+        self.realShape = shape
 
 
     def get_output_shape(self):
@@ -85,11 +90,17 @@ class ImageModule(Module):
     def add_output_connection(self, other):
         if self.can_add_output():
             self.output_connections += 1
-            self.num_outputs += 1
+            self.num_outputs = self.output_connections
         else:
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
         other.realShape = self.get_output_shape()
-        other.init_block()
+
+        print(f"{self.name} adding an output connection! {self.get_output_shape()}")
+        try:
+            other.init_block()
+        except AttributeError:
+            # Module is a noop or output layer, ignore
+            pass
     
 
     def forward(self, inputs):
@@ -177,12 +188,12 @@ class ModuleDag(Module):
         self.modules[module.name] = module
 
     def remove_module(self, module):
-        self.graph.remove_node(module.name)
-        self.modules.pop(module.name, None)
+        self.graph.remove_node(module)
+        self.modules.pop(module, None)
     
     def add_connection(self, from_module, to_module):
         if from_module not in self.modules or to_module not in self.modules:
-            raise ValueError("Both modules must exist in the graph before connecting them.")
+            raise ValueError(f"Both modules must exist in the graph before connecting them. {from_module in self.modules} {to_module in self.modules}")
         
         from_mod = self.modules[from_module]
         to_mod = self.modules[to_module]
@@ -221,7 +232,7 @@ class ModuleDag(Module):
                 if not module.validate_inout():
                     print(f"{module_name}")
                     #print(f"{module.}")
-                    raise ValueError(f"{module_name} does not have the correct number of input/output connections.")
+                    raise ValueError(f"{module_name} does not have the correct number of input/output connections. {module.input_connections} {module.output_connections}")
                 
         with torch.no_grad():
             self.eval()
@@ -268,8 +279,7 @@ class ModuleDag(Module):
         for module_name in nx.topological_sort(self.graph):
             module = self.modules[module_name]
             input_data = inputs.get(module_name, [])
-            print(inputs)
-            print(input_data, module_name)
+            
 
             output_data = module.forward(input_data)
             outputs[module_name] = output_data
@@ -282,7 +292,7 @@ class ModuleDag(Module):
                 else:
                     inputs[successor] = list(output_data)
 
-                print(f"{successor}'s inputs are set to {inputs[successor]}")
+                # print(f"{successor}'s inputs are set to {inputs[successor]}")
                 
         
 
@@ -294,13 +304,18 @@ class ModuleDag(Module):
         return random.choice(list(self.graph.edges))
 
     def insertBetween(self,new,u,v):
-        if new not in self.graph:
-            self.add_module(new)
-        self.graph.remove_edge(u, v)
+
+        self.add_module(new)
+        self.remove_connection(u, v)
 
 
-        self.graph.add_edge(u, new)
-        self.graph.add_edge(new, v)
+        self.add_connection(u, new.name)
+        self.add_connection(new.name, v)
+
+    def remove_connection(self,u,v):
+        self.graph.remove_edge(u,v)
+        self.modules[u].output_connections -= 1
+        self.modules[v].input_connections -= 1
 
     def insertChainBetween(self, new_nodes, u, v):
         if not new_nodes:
@@ -308,21 +323,21 @@ class ModuleDag(Module):
         
         for node in new_nodes:
             if node not in self.graph:
-                self.graph.add_node(node)
+                self.add_module(node)
         
 
-        self.graph.remove_edge(u, v)
+        self.remove_connection(u, v)
         
-        self.graph.add_edge(u, new_nodes[0])
+        self.add_connection(u, new_nodes[0].name)
         
         for i in range(len(new_nodes) - 1):
-            self.graph.add_edge(new_nodes[i], new_nodes[i + 1])
+            self.add_connection(new_nodes[i].name, new_nodes[i + 1].name)
         
-        self.graph.add_edge(new_nodes[-1], v)
+        self.add_connection(new_nodes[-1].name, v)
 
     def has_one_predecessor(self,node):
         predecessors = list(self.graph.predecessors(node))
-        
+
         return len(predecessors) == 1
 
     def get_random_node(self):
@@ -348,10 +363,10 @@ class ModuleDag(Module):
         self.add_module(new_node)
 
         for pred in predecessors:
-            self.graph.add_edge(pred, new_node)
+            self.add_connection(pred, new_node)
         
         for succ in successors:
-            self.graph.add_edge(new_node, succ)
+            self.add_connection(new_node, succ)
 
     def remove_node_and_link(self, node):
 
@@ -364,12 +379,17 @@ class ModuleDag(Module):
 
 
         if predecessors:
+            
             pred = predecessors[0]
+            self.remove_connection(pred, node)
             for succ in successors:
-                self.graph.add_edge(pred, succ)
+                self.remove_connection(node, succ)
+                self.add_connection(pred, succ)
 
 
         self.remove_module(self.modules[node])
+    def display(self):
+        display_graph(self.graph)
 
 
 
@@ -399,3 +419,5 @@ if __name__ == "__main__":
     initial_input = [1]
     output = mg.forward(initial_input)
     print("Final Output:", output)
+
+    mg.display()

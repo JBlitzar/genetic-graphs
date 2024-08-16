@@ -3,6 +3,7 @@ import modules
 from moduledag import ModuleDag
 from typing import Tuple
 import random
+import uuid
 
 
 def get_classes():
@@ -23,9 +24,14 @@ for cls in classes:
         shape_dict[cls.shape_transform].append(cls)
     else:
         shape_dict[cls.shape_transform] = [cls]
+
+def initialize(cls):
+    return cls(name=cls.__name__ +"_"+ str(uuid.uuid4()))
+
+
 def rand_of_transform(transform: Tuple[int,int,int]):
     choices = shape_dict[transform]
-    return random.choice(choices)
+    return initialize(random.choice(choices))
 
 
 
@@ -36,14 +42,16 @@ def rand_of_transform(transform: Tuple[int,int,int]):
 def mutate(dag: ModuleDag):
     mutation_possibilities = ["sameTransformation","skip","downup","smallbig","inout","cull","replaceSame","noop"]
 
-    mutationType = random.choice(mutation_possibilities)
+    mutationType = "inout"#random.choice(mutation_possibilities)
 
+    print(mutationType)
 
     
 
     match mutationType:
         case "sameTransformation":
             u,v = dag.randomEdge()
+            print("sametrans", u, v)
             dag.insertBetween(rand_of_transform((1,1,1)),u,v)
         case "skip":
             pass
@@ -52,6 +60,7 @@ def mutate(dag: ModuleDag):
             dag.insertChainBetween([rand_of_transform((1,0.5,0.5)),rand_of_transform((1,2,2))],u,v)
         case "inout":
             u,v = dag.randomEdge()
+            print(u,v)
             dag.insertChainBetween([rand_of_transform((2,1,1)),rand_of_transform((0.5,1,1))],u,v)
         case "downup":
             u,v = dag.randomEdge()
@@ -62,14 +71,17 @@ def mutate(dag: ModuleDag):
 
             while True:
                 candidate = dag.get_random_node()
-                if dag.has_one_predecessor(candidate.name):
+                if dag.has_one_predecessor(candidate.name) and hasattr(candidate, "shape_transform"):
                     break
 
             
             dag.remove_node_and_link(candidate.name)
 
         case "replaceSame":
-            n = dag.get_random_node()
+            while True:
+                n = dag.get_random_node()
+                if hasattr(n, "shape_transform"):
+                    break
             dag.replace_node(n.name, rand_of_transform(n.shape_transform))
         case "noop":
             pass
