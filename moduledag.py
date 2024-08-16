@@ -12,6 +12,7 @@ class FunctionalToClass(nn.Module):
     
 class Module(nn.Module):
     def __init__(self, name, num_inputs, num_outputs):
+        super().__init__()
         self.name = name
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
@@ -37,7 +38,7 @@ class Module(nn.Module):
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
         
     def validate_inout(self):
-        return self.input_connections == self.output_connections and self.output_connections == self.num_outputs
+        return self.input_connections == self.num_inputs and self.output_connections == self.num_outputs
     
 
     def forward(self, inputs):
@@ -141,12 +142,14 @@ class CombinationModule(Module):
 
 
 class ModuleDag(Module):
-    def __init__(self, name):
+    def __init__(self, name, input_size: tuple):
+        super().__init__(name, 1,1)
         self.name = name
         self.num_inputs = 1
         self.num_outputs = 1
         self.input_connections = 0
         self.output_connections = 0
+        self.input_size = input_size
 
         self.graph = nx.DiGraph()
         self.modules = {}
@@ -194,7 +197,17 @@ class ModuleDag(Module):
             # Validate all other modules normally
             else:
                 if not module.validate_inout():
+                    print(f"{module_name}")
+                    #print(f"{module.}")
                     raise ValueError(f"{module_name} does not have the correct number of input/output connections.")
+                
+        with torch.no_grad():
+            self.eval()
+            try:
+                self.forward(torch.randn(self.input_size))
+            except:
+                return False
+
         
 
     def serialize_to_json(self):
@@ -259,7 +272,7 @@ class ModuleDag(Module):
 
 if __name__ == "__main__":
 
-    mg = ModuleDag("TestGraph")
+    mg = ModuleDag("TestGraph", input_size=1)
 
 
     mg.add_module(Module("InputModule", num_inputs=1, num_outputs=2))
