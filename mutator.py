@@ -4,6 +4,7 @@ from moduledag import ModuleDag
 from typing import Tuple, Union
 import random
 import uuid
+import networkx as nx
 
 
 def get_classes():
@@ -85,11 +86,40 @@ def mutate(dag: ModuleDag):
             
             dag.add_module(connector)
             dag.remove_connection(pred_ref,candidate_2.name)
+            try:
+                dag.add_connection(pred_ref,connector.name)
+                dag.add_connection(connector.name, candidate_2.name)
+                dag.add_connection(candidate.name, connector.name)
+            except ValueError: # cycle
+                try:
+                    dag.remove_connection(candidate.name, connector.name)
+                except nx.exception.NetworkXError:
+                    pass
+                try:
+                    dag.remove_connection(connector.name, candidate_2.name)
+                except nx.exception.NetworkXError:
+                    pass
+                try:
+                    dag.remove_connection(pred_ref,connector.name)
+                except nx.exception.NetworkXError:
+                    pass
+                
+                
+                
 
-            dag.add_connection(pred_ref,connector.name)
-            dag.add_connection(connector.name, candidate_2.name)
-            dag.add_connection(candidate.name, connector.name)
-            
+                
+                dag.add_connection(pred_ref,candidate_2.name)
+                pred_ref = list(dag.graph.predecessors(candidate.name))[0]
+                dag.remove_connection(pred_ref,candidate_2.name)
+                print(candidate)
+                print("->")
+                print(pred_ref)
+                print(candidate_2)
+
+
+                dag.add_connection(pred_ref,connector.name)
+                dag.add_connection(connector.name, candidate.name)
+                dag.add_connection(candidate_2.name, connector.name)
 
 
 
