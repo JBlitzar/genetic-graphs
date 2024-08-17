@@ -21,6 +21,7 @@ class Module(nn.Module):
         self.num_outputs = num_outputs
         self.input_connections = 0
         self.output_connections = 0
+        self.realShape = None
 
     def can_add_input(self):
         return self.input_connections < self.num_inputs
@@ -42,6 +43,10 @@ class Module(nn.Module):
         
     def validate_inout(self):
         return self.input_connections == self.num_inputs and self.output_connections == self.num_outputs
+    
+    def propogate_realShape(self, others):
+        for other in others:
+            other.realShape = self.realShape
     
 
     def forward(self, inputs):
@@ -101,6 +106,10 @@ class ImageModule(Module):
         except AttributeError:
             # Module is a noop or output layer, ignore
             pass
+
+    def propogate_realShape(self, others):
+        for other in others:
+            other.realShape = self.get_output_shape()
     
 
     def forward(self, inputs):
@@ -115,7 +124,7 @@ class CombinationModule(Module):
         super().__init__(name, 2, 1)
 
         self.realShape = None
-        self.shapeTransform = (1,1,1)
+        self.shapeTransform = (1,1,1,1)
 
 
     def get_output_shape(self):
@@ -146,7 +155,14 @@ class CombinationModule(Module):
         else:
             raise ValueError(f"{self.name} has reached its maximum number of outputs.")
         other.realShape = self.get_output_shape()
-        other.init_block()
+        try:
+            other.init_block()
+        except AttributeError:
+            pass
+
+    def propogate_realShape(self, others):
+        for other in others:
+            other.realShape = self.get_output_shape()
     
 
     def forward(self, inputs):
@@ -218,7 +234,25 @@ class ModuleDag(Module):
         to_mod.add_input_connection(from_mod)
     
 
+    def propogate_shapes(self):
+        start = "InputModule"
+
+        def prop(mod):
+            children = self.graph.successors(mod.name)
+
+            module_children = [self.modules[a] for a in children]
+
+            mod.propogate_realShape(module_children)
+
+
+            for child in module_children:
+                prop(child)
+
     def validate_graph(self):
+
+        self.propogate_shapes()
+
+
         for module_name, module in self.modules.items():
 
             if module_name == "InputModule":
@@ -239,10 +273,8 @@ class ModuleDag(Module):
                 
         with torch.no_grad():
             self.eval()
-            try:
-                self.forward(torch.randn(self.input_size))
-            except:
-                return False
+            
+            self.forward(torch.randn(self.input_size))
 
         
 

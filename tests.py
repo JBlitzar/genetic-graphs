@@ -4,7 +4,7 @@ import torch
 from mutator import mutate
 import matplotlib.pyplot as plt
 
-mg = ModuleDag("TestNet", input_size=1)
+mg = ModuleDag("TestNet", input_size=(1,3,64,64))
 inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))
 inputmod.setShape((1,3,64,64))
 inputmod.init_block()
@@ -29,23 +29,29 @@ mg.validate_graph()
 
 
 
-initial_input = [torch.randn((1,3,64,64))]
+initial_input = torch.randn((1,3,64,64))
 output = mg.forward(initial_input)
 print("Final Output:", output)
 
-mg.display()
+#mg.display()
 
 plt.close()
 
+mutate(mg,"skip")
+for i in range(100):
+    mutate(mg)
+    #mg.display()
+    mg.validate_graph()
 
-mutate(mg)
-mg.validate_graph()
 
 
 
-
-initial_input = [torch.randn((3,64,64))]
+initial_input = torch.randn((1,3,64,64))
 output = mg.forward(initial_input)
 print("Final Output:", output)
 
 mg.display()
+
+comp = torch.compile(mg)
+comp.to("mps")
+print(comp(torch.randn((1,3,64,64))))

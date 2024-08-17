@@ -10,7 +10,7 @@ class SimpleConv(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Conv2d(int(channels), int(channels), kernel_size=3, stride=1, padding=1)
 
 class Conv211(ImageModule):
@@ -20,7 +20,7 @@ class Conv211(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Conv2d(channels, channels * 2, kernel_size=3, stride=1, padding=1)
 
 class ConvBack(ImageModule):
@@ -30,7 +30,7 @@ class ConvBack(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Conv2d(channels, channels // 2, kernel_size=3, stride=1, padding=1)
 
 class ConvBackUpsample(ImageModule):
@@ -40,7 +40,7 @@ class ConvBackUpsample(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Sequential(nn.Conv2d(channels, channels // 2, kernel_size=3, stride=1, padding=1),nn.Upsample(scale_factor=2))
 
 class ConvDown(ImageModule):
@@ -50,7 +50,7 @@ class ConvDown(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Conv2d(channels, channels, kernel_size=4, stride=2, padding=1)
 
 class ConvTranspose(ImageModule):
@@ -60,7 +60,7 @@ class ConvTranspose(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.ConvTranspose2d(channels, channels, kernel_size=4, stride=2, padding=1, output_padding=0)
 
 class ConvSandwich(ImageModule):
@@ -70,7 +70,7 @@ class ConvSandwich(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Sequential(
             nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
@@ -85,7 +85,7 @@ class ConvSandwichQuadruple(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Sequential(
             nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
@@ -104,7 +104,7 @@ class DeeperConv(ImageModule):
         super().__init__(name, self.shape_transform)
 
     def init_block(self):
-        channels = self.realShape[1]
+        channels = int(self.realShape[1])
         self.block = nn.Conv2d(channels, channels * 2, kernel_size=4, stride=2, padding=1)
 
 class Upsample(ImageModule):
@@ -184,14 +184,14 @@ class Dropout(ImageModule):
         super().__init__(name, self.shape_transform)
         self.block = nn.Dropout()
 
-class BatchNorm(ImageModule):
-    shape_transform = (1, 1, 1)
+# class BatchNorm(ImageModule):
+#     shape_transform = (1, 1, 1)
 
-    def __init__(self, name):
-        super().__init__(name, self.shape_transform)
+#     def __init__(self, name):
+#         super().__init__(name, self.shape_transform)
 
-    def init_block(self):
-        self.block = nn.BatchNorm2d(self.realShape[0])
+#     def init_block(self):
+#         self.block = nn.BatchNorm2d(self.realShape[0])
 
 class SummationModule(CombinationModule):
     shape_transform = "comb"
