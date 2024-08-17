@@ -1,7 +1,7 @@
 import inspect
 import modules
 from moduledag import ModuleDag
-from typing import Tuple
+from typing import Tuple, Union
 import random
 import uuid
 
@@ -29,7 +29,7 @@ def initialize(cls):
     return cls(name=cls.__name__ +"_"+ str(uuid.uuid4()))
 
 
-def rand_of_transform(transform: Tuple[int,int,int]):
+def rand_of_transform(transform: Union[Tuple[int,int,int],str]):
     choices = shape_dict[transform]
     return initialize(random.choice(choices))
 
@@ -42,7 +42,7 @@ def rand_of_transform(transform: Tuple[int,int,int]):
 def mutate(dag: ModuleDag):
     mutation_possibilities = ["sameTransformation","skip","downup","smallbig","inout","cull","replaceSame","noop"]
 
-    mutationType = "inout"#random.choice(mutation_possibilities)
+    mutationType = "skip"#random.choice(mutation_possibilities)
 
     print(mutationType)
 
@@ -54,7 +54,46 @@ def mutate(dag: ModuleDag):
             print("sametrans", u, v)
             dag.insertBetween(rand_of_transform((1,1,1)),u,v)
         case "skip":
-            pass
+
+            connector = rand_of_transform("comb")
+
+
+            candidate = None
+
+            
+            while True:
+                candidate = dag.get_random_node()
+                if dag.has_one_predecessor(candidate.name) and hasattr(candidate, "shape_transform"):
+                    break
+
+
+            candidate_2 = None
+
+            
+            while True:
+                candidate_2 = dag.get_random_node()
+                if dag.has_one_predecessor(candidate_2.name) and hasattr(candidate_2, "shape_transform") and candidate_2.realShape == candidate.realShape:
+                    break
+            
+
+
+            pred_ref = list(dag.graph.predecessors(candidate_2.name))[0]
+            print(candidate)
+            print("->")
+            print(pred_ref)
+            print(candidate_2)
+            
+            dag.add_module(connector)
+            dag.remove_connection(pred_ref,candidate_2.name)
+
+            dag.add_connection(pred_ref,connector.name)
+            dag.add_connection(connector.name, candidate_2.name)
+            dag.add_connection(candidate.name, connector.name)
+            
+
+
+
+
         case "smallbig":
             u,v = dag.randomEdge()
             dag.insertChainBetween([rand_of_transform((1,0.5,0.5)),rand_of_transform((1,2,2))],u,v)

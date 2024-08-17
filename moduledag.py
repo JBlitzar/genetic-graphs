@@ -112,7 +112,7 @@ class ImageModule(Module):
 
 class CombinationModule(Module):
     def __init__(self, name):
-        super().__init__(name, 1, 1)
+        super().__init__(name, 2, 1)
 
         self.realShape = None
         self.shapeTransform = (1,1,1)
@@ -128,7 +128,10 @@ class CombinationModule(Module):
     
     def can_add_output(self):
         return True
+    
 
+    def validate_inout(self):
+        return True # hack
     
     def add_input_connection(self, other):
         if self.can_add_input():
@@ -345,10 +348,11 @@ class ModuleDag(Module):
         return self.modules[random.choice(nodes)]
     
     def replace_node(self, old_node, new_node):
+        new_node_ref = new_node.name
         if old_node not in self.graph:
             raise ValueError(f"Old node {old_node} not found in the graph.")
 
-        if new_node in self.graph:
+        if new_node_ref in self.graph:
             raise ValueError(f"New node {new_node} already exists in the graph.")
 
 
@@ -356,17 +360,19 @@ class ModuleDag(Module):
         successors = list(self.graph.successors(old_node))
 
 
-
+        
         self.remove_module(old_node)
 
 
         self.add_module(new_node)
 
         for pred in predecessors:
-            self.add_connection(pred, new_node)
+            self.modules[pred].output_connections -= 1
+            self.add_connection(pred, new_node_ref)
         
         for succ in successors:
-            self.add_connection(new_node, succ)
+            self.modules[succ].input_connections -= 1
+            self.add_connection(new_node_ref, succ)
 
     def remove_node_and_link(self, node):
 
@@ -387,7 +393,7 @@ class ModuleDag(Module):
                 self.add_connection(pred, succ)
 
 
-        self.remove_module(self.modules[node])
+        self.remove_module(node)
     def display(self):
         display_graph(self.graph)
 
