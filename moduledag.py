@@ -113,7 +113,9 @@ class ImageModule(Module):
     
 
     def forward(self, inputs):
-        x = inputs[0]
+        x = torch.stack(inputs) if type(inputs) == type([]) else inputs
+
+        x = x.squeeze(0)
 
 
         return [self.block(x)]
