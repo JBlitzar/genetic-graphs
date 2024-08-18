@@ -95,7 +95,7 @@ class GeneticAlgorithmTrainer:
             individual_model = individual#torch.compile(individual)
             individual_model.to("mps")
             val_loss = train_model(individual_model, subdir=f"{generation}/{uid}")
-            scores.append[val_loss]
+            scores.append(val_loss)
 
     def select_parents(self,generation):
 
