@@ -277,7 +277,15 @@ class ModuleDag(Module):
         with torch.no_grad():
             self.eval()
             
-            self.forward(torch.randn(self.input_size))
+            result = self.forward(torch.randn(self.input_size))
+            result = torch.stack(result) if type(result) == type([]) else result
+            result = result.squeeze(0)
+            try:
+                assert tuple(result.size()) == self.input_size
+            except AssertionError:
+                print(result.size(), self.input_size)
+                print("^ validate sizes")
+                raise AssertionError # re-raise
 
         
 

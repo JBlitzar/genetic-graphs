@@ -4,9 +4,9 @@ import torch
 from mutator import mutate
 import matplotlib.pyplot as plt
 
-mg = ModuleDag("TestNet", input_size=(1,3,64,64))
+mg = ModuleDag("TestNet", input_size=(1,1,28,28))
 inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))
-inputmod.setShape((1,3,64,64))
+inputmod.setShape((1,1,28,28))
 inputmod.init_block()
 mg.add_module(inputmod)
 mg.add_module(SimpleConv("conv1"))
@@ -29,7 +29,7 @@ mg.validate_graph()
 
 
 
-initial_input = torch.randn((1,3,64,64))
+initial_input = torch.randn((1,1,28,28))
 output = mg.forward(initial_input)
 print("Final Output:", output)
 
@@ -46,7 +46,7 @@ for i in range(10):
 
 
 
-initial_input = torch.randn((1,3,64,64))
+initial_input = torch.randn((1,1,28,28))
 output = mg.forward(initial_input)
 print("Final Output:", output)
 
@@ -54,4 +54,4 @@ mg.display()
 
 comp = torch.compile(mg)
 comp.to("mps")
-print(comp(torch.randn((1,3,64,64))))
+print(comp(torch.randn((1,1,28,28))))

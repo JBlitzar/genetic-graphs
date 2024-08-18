@@ -21,24 +21,27 @@ class MNISTModuleDagWrapper(nn.Module):
             nn.Flatten(),
             nn.Linear(input_size,output_size)
         )
+        self.input_size = input_size
+        self.output_size = output_size
 
     def forward(self,x):
         x = torch.Tensor(x)
-        #print(x.size())
+        print(x.size())
         d = self.dag(x)
-        #print(len(d))
+        print(len(d))
         ds = torch.stack(d)
-        # print(ds.size())
-        # print("^^^ d")
+        ds = ds.squeeze(0)
+        print(ds.size())
+        print("^^^ d")
         z = self.block(torch.squeeze(ds))
-        #print(z.size())
+        print(z.size())
         return z
     
     def serialize_to_json(self):
         return self.dag.serialize_to_json()
     
     def mutate(self):
-        return mutate(self.dag)
+        return self.__class__(mutate(self.dag),input_size=self.input_size,output_size=self.output_size)
 
 
 def get_seed():
@@ -106,6 +109,7 @@ class GeneticAlgorithmTrainer:
     def select_parents(self,generation):
 
         fitness_scores = np.array(self.get_scores(generation))
+        fitness_scores = 1 - fitness_scores
         fitness_scores = fitness_scores - np.min(fitness_scores) + 1e-10
         probabilities = fitness_scores / np.sum(fitness_scores)
         indices = np.random.choice(range(self.population_size), size=self.population_size, p=probabilities)
@@ -127,6 +131,6 @@ class GeneticAlgorithmTrainer:
         
     
 if __name__ == "__main__":
-    trainer = GeneticAlgorithmTrainer(1,10,1,get_seed)
+    trainer = GeneticAlgorithmTrainer(10,10,1,get_seed)
     trainer.run()
 
