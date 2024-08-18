@@ -22,14 +22,14 @@ class MNISTModuleDagWrapper(nn.Module):
 
     def forward(self,x):
         x = torch.Tensor(x)
-        print(x.size())
+        #print(x.size())
         d = self.dag(x)
-        print(len(d))
+        #print(len(d))
         ds = torch.stack(d)
-        print(ds.size())
-        print("^^^ d")
+        # print(ds.size())
+        # print("^^^ d")
         z = self.block(torch.squeeze(ds))
-        print(z.size())
+        #print(z.size())
         return z
     
     def serialize_to_json(self):
@@ -84,9 +84,10 @@ class GeneticAlgorithmTrainer:
 
     def get_scores(self,generation):
         scores = []
+        os.mkdir(f"runs/{generation}")
         for individual in self.population:
             uid = str(uuid.uuid4())
-            #os.mkdir(f"runs/{generation}")
+            
             os.mkdir(f"runs/{generation}/{uid}")
             with open(f"runs/{generation}/{uid}/model.json", "w+") as f:
                 f.write(individual.serialize_to_json())

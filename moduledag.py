@@ -323,7 +323,7 @@ class ModuleDag(Module):
             outputs[module_name] = output_data
             
 
-            print(f"Successors: {[a for a in self.graph.successors(module_name)]}")
+            #print(f"Successors: {[a for a in self.graph.successors(module_name)]}")
             for successor in self.graph.successors(module_name):
                 if successor in inputs:
                     inputs[successor].extend(output_data)
