@@ -31,9 +31,10 @@ class LightningTrainer(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        print(x.size())
+        #print(x.size())
         logits = self(x)
-        print(logits.size())
+        logits = torch.stack(logits) if type(logits) == type([]) else logits
+        #print(logits.size())
         loss = F.cross_entropy(logits, y)
         self.log('val_loss', loss, prog_bar=True)
         self.validation_step_outputs.append(loss)

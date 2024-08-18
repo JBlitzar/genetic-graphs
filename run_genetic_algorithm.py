@@ -9,6 +9,8 @@ from tqdm import trange
 import os
 import torch.nn as nn
 import numpy as np
+import os
+os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
 class MNISTModuleDagWrapper(nn.Module):
@@ -34,6 +36,9 @@ class MNISTModuleDagWrapper(nn.Module):
     
     def serialize_to_json(self):
         return self.dag.serialize_to_json()
+    
+    def mutate(self):
+        return mutate(self.dag)
 
 
 def get_seed():
@@ -78,7 +83,7 @@ class GeneticAlgorithmTrainer:
     def mutate(self, item, amt=1):
         with torch.no_grad():
             for _ in range(amt):
-                item =  item.mutate()
+                item = item.mutate()
             return item
 
 
@@ -96,6 +101,7 @@ class GeneticAlgorithmTrainer:
             individual_model.to("mps")
             val_loss = train_model(individual_model, subdir=f"{generation}/{uid}")
             scores.append(val_loss)
+        return scores
 
     def select_parents(self,generation):
 
@@ -104,7 +110,7 @@ class GeneticAlgorithmTrainer:
         probabilities = fitness_scores / np.sum(fitness_scores)
         indices = np.random.choice(range(self.population_size), size=self.population_size, p=probabilities)
 
-        return [self.population[i] for i in indices]
+        return [self.population[i] for i in indices], fitness_scores
 
 
     def mutate_population(self):
@@ -114,13 +120,13 @@ class GeneticAlgorithmTrainer:
         self.initialize_population()
         for generation in trange(self.generations):
             print(f"Generation {generation + 1}")
-            self.population = self.select_parents(generation)
+            self.population, scores = self.select_parents(generation)
             self.mutate_population()
-            best_individual = max(self.population, key=self.evaluate)
-            print(f"Best individual fitness: {self.evaluate(best_individual)}")
-        return best_individual
+
+            print(f"Best individual fitness: {max(scores)}")
+        
     
 if __name__ == "__main__":
-    trainer = GeneticAlgorithmTrainer(10,10,1,get_seed)
+    trainer = GeneticAlgorithmTrainer(1,10,1,get_seed)
     trainer.run()
 
