@@ -6,11 +6,32 @@ import torch
 import uuid
 import numpy as np
 from tqdm import trange
+import os
+import torch.nn as nn
+import numpy as np
+
+
+class MNISTModuleDagWrapper(nn.Module):
+    def __init__(self,dag,input_size,output_size):
+        super().__init__()
+        self.dag = dag
+        self.block = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(input_size,output_size)
+        )
+
+    def forward(self,x):
+        x = torch.Tensor(x)
+        return self.block(torch.stack(self.dag(x)))
+    
+    def serialize_to_json(self):
+        return self.dag.serialize_to_json()
+
 
 def get_seed():
-    mg = ModuleDag("TestNet", input_size=(1,3,64,64))
+    mg = ModuleDag("TestNet", input_size=(64,1,28,28))
     inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))
-    inputmod.setShape((1,3,64,64))
+    inputmod.setShape((64,1,28,28))
     inputmod.init_block()
     mg.add_module(inputmod)
     mg.add_module(SimpleConv("conv1"))
@@ -29,6 +50,7 @@ def get_seed():
 
 
     mg.validate_graph()
+    return MNISTModuleDagWrapper(mg,input_size=28*28,output_size=10)
 
 
 class GeneticAlgorithmTrainer:
@@ -43,6 +65,7 @@ class GeneticAlgorithmTrainer:
 
     def initialize_population(self):
         self.population = [self.get_seed() for _ in range(self.population_size)]
+        print(self.population)
 
     def mutate(self, item, amt=1):
         with torch.no_grad():
@@ -55,7 +78,9 @@ class GeneticAlgorithmTrainer:
         scores = []
         for individual in self.population:
             uid = str(uuid.uuid4())
-            with open(f"{generation}/{uid}/model.json", "w+") as f:
+            os.mkdir(f"runs/{generation}")
+            os.mkdir(f"runs/{generation}/{uid}")
+            with open(f"runs/{generation}/{uid}/model.json", "w+") as f:
                 f.write(individual.serialize_to_json())
             
             individual_model = individual#torch.compile(individual)
@@ -80,7 +105,7 @@ class GeneticAlgorithmTrainer:
         self.initialize_population()
         for generation in trange(self.generations):
             print(f"Generation {generation + 1}")
-            self.population = self.select_parents()
+            self.population = self.select_parents(generation)
             self.mutate_population()
             best_individual = max(self.population, key=self.evaluate)
             print(f"Best individual fitness: {self.evaluate(best_individual)}")

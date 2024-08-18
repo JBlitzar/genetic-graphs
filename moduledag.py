@@ -185,7 +185,7 @@ class ModuleDag(Module):
         self.input_size = input_size
 
         self.graph = nx.DiGraph()
-        self.modules = {}
+        self.modules_moduledag = nn.ModuleDict()
     
     def add_module(self, module):
         def get_child_attributes(child_class):
@@ -199,23 +199,24 @@ class ModuleDag(Module):
                 if cls is not type(child_class):
                     parent_attrs.update(dir(cls))
                     child_specific_attrs = child_attrs - parent_attrs
-
+            
+            child_specific_attrs = [a for a in child_specific_attrs if not a.startswith("_")]
             return child_specific_attrs
         
         print(get_child_attributes(module))
-        self.graph.add_node(module.name, module_type=module.__class__)
-        self.modules[module.name] = module
+        self.graph.add_node(module.name, module_type=module.__class__.__name__)
+        self.modules_moduledag[module.name] = module
 
     def remove_module(self, module):
         self.graph.remove_node(module)
-        self.modules.pop(module, None)
+        self.modules_moduledag.pop(module, None)
     
     def add_connection(self, from_module, to_module):
-        if from_module not in self.modules or to_module not in self.modules:
-            raise ValueError(f"Both modules must exist in the graph before connecting them. {from_module in self.modules} {to_module in self.modules}")
+        if from_module not in self.modules_moduledag or to_module not in self.modules_moduledag:
+            raise ValueError(f"Both modules must exist in the graph before connecting them. {from_module in self.modules_moduledag} {to_module in self.modules_moduledag}")
         
-        from_mod = self.modules[from_module]
-        to_mod = self.modules[to_module]
+        from_mod = self.modules_moduledag[from_module]
+        to_mod = self.modules_moduledag[to_module]
         
         if not from_mod.can_add_output():
             raise ValueError(f"{from_module} cannot add more output connections.")
@@ -240,7 +241,7 @@ class ModuleDag(Module):
         def prop(mod):
             children = self.graph.successors(mod.name)
 
-            module_children = [self.modules[a] for a in children]
+            module_children = [self.modules_moduledag[a] for a in children]
 
             mod.propogate_realShape(module_children)
 
@@ -253,7 +254,7 @@ class ModuleDag(Module):
         self.propogate_shapes()
 
 
-        for module_name, module in self.modules.items():
+        for module_name, module in self.modules_moduledag.items():
 
             if module_name == "InputModule":
                 assert module.output_connections >= 1
@@ -291,15 +292,15 @@ class ModuleDag(Module):
         for node in self.graph.nodes(data=True):
             module_name = node[0]
             module_data = node[1]
-            module = module_data["module_class"](module_name)
-            self.modules[module_name] = module
+            module = globals()[module_data["module_class"]](module_name)
+            self.modules_moduledag[module_name] = module
         
 
         for edge in self.graph.edges():
             from_module = edge[0]
             to_module = edge[1]
-            self.modules[from_module].add_output_connection()
-            self.modules[to_module].add_input_connection()
+            self.modules_moduledag[from_module].add_output_connection()
+            self.modules_moduledag[to_module].add_input_connection()
         
 
         self.validate_graph()
@@ -312,7 +313,7 @@ class ModuleDag(Module):
 
 
         for module_name in nx.topological_sort(self.graph):
-            module = self.modules[module_name]
+            module = self.modules_moduledag[module_name]
             input_data = inputs.get(module_name, [])
             
 
@@ -349,8 +350,8 @@ class ModuleDag(Module):
 
     def remove_connection(self,u,v):
         self.graph.remove_edge(u,v)
-        self.modules[u].output_connections -= 1
-        self.modules[v].input_connections -= 1
+        self.modules_moduledag[u].output_connections -= 1
+        self.modules_moduledag[v].input_connections -= 1
 
     def insertChainBetween(self, new_nodes, u, v):
         if not new_nodes:
@@ -377,7 +378,7 @@ class ModuleDag(Module):
 
     def get_random_node(self):
         nodes = list(self.graph.nodes)
-        return self.modules[random.choice(nodes)]
+        return self.modules_moduledag[random.choice(nodes)]
     
     def replace_node(self, old_node, new_node):
         new_node_ref = new_node.name
@@ -399,11 +400,11 @@ class ModuleDag(Module):
         self.add_module(new_node)
 
         for pred in predecessors:
-            self.modules[pred].output_connections -= 1
+            self.modules_moduledag[pred].output_connections -= 1
             self.add_connection(pred, new_node_ref)
         
         for succ in successors:
-            self.modules[succ].input_connections -= 1
+            self.modules_moduledag[succ].input_connections -= 1
             self.add_connection(new_node_ref, succ)
 
     def remove_node_and_link(self, node):
@@ -428,6 +429,9 @@ class ModuleDag(Module):
         self.remove_module(node)
     def display(self):
         display_graph(self.graph)
+
+
+
 
 
 

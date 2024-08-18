@@ -20,15 +20,20 @@ class LightningTrainer(pl.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
+
         x, y = batch
+        
         logits = self(x)
+        
         loss = F.cross_entropy(logits, y)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
+        print(x.size())
         logits = self(x)
+        print(logits.size())
         loss = F.cross_entropy(logits, y)
         self.log('val_loss', loss, prog_bar=True)
         self.validation_step_outputs.append(loss)
