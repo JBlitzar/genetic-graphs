@@ -1,0 +1,69 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "DeeperConv",
+            "id": "DeeperConv_41543fbc-4e50-4c27-b584-38984dd18306"
+        },
+        {
+            "module_type": "ConvBackUpsample",
+            "id": "ConvBackUpsample_fad50aab-ca87-4047-90cc-9397edcd3621"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "DeeperConv_41543fbc-4e50-4c27-b584-38984dd18306"
+        },
+        {
+            "source": "conv2",
+            "target": "relu2"
+        },
+        {
+            "source": "relu2",
+            "target": "OutputModule"
+        },
+        {
+            "source": "DeeperConv_41543fbc-4e50-4c27-b584-38984dd18306",
+            "target": "ConvBackUpsample_fad50aab-ca87-4047-90cc-9397edcd3621"
+        },
+        {
+            "source": "ConvBackUpsample_fad50aab-ca87-4047-90cc-9397edcd3621",
+            "target": "conv2"
+        }
+    ]
+}

@@ -1,0 +1,89 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvSandwichQuadruple",
+            "id": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "module_type": "ConvDown",
+            "id": "ConvDown_54a85c72-e345-4722-a159-dccf5109f60b"
+        },
+        {
+            "module_type": "ConvTranspose",
+            "id": "ConvTranspose_726d42c9-e7bc-4088-9419-f5afd6930e67"
+        },
+        {
+            "module_type": "SummationModule",
+            "id": "SummationModule_54bc6c6f-3e64-4d80-a5f6-e5adf7afa6e0"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "conv1",
+            "target": "SummationModule_54bc6c6f-3e64-4d80-a5f6-e5adf7afa6e0"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "ConvDown_54a85c72-e345-4722-a159-dccf5109f60b"
+        },
+        {
+            "source": "relu2",
+            "target": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "OutputModule"
+        },
+        {
+            "source": "ConvDown_54a85c72-e345-4722-a159-dccf5109f60b",
+            "target": "ConvTranspose_726d42c9-e7bc-4088-9419-f5afd6930e67"
+        },
+        {
+            "source": "ConvTranspose_726d42c9-e7bc-4088-9419-f5afd6930e67",
+            "target": "SummationModule_54bc6c6f-3e64-4d80-a5f6-e5adf7afa6e0"
+        },
+        {
+            "source": "SummationModule_54bc6c6f-3e64-4d80-a5f6-e5adf7afa6e0",
+            "target": "relu2"
+        }
+    ]
+}

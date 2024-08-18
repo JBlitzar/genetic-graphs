@@ -1,0 +1,89 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvSandwichQuadruple",
+            "id": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "module_type": "Conv211",
+            "id": "Conv211_cd98967a-7b23-47d4-bc34-aab9300d54e3"
+        },
+        {
+            "module_type": "ConvBack",
+            "id": "ConvBack_ae4f54b1-dcd0-422c-9967-44df2d2ab8c6"
+        },
+        {
+            "module_type": "SummationModule",
+            "id": "SummationModule_52c232f8-faa4-40cd-9e7a-07335ff80a31"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "Conv211_cd98967a-7b23-47d4-bc34-aab9300d54e3"
+        },
+        {
+            "source": "conv1",
+            "target": "SummationModule_52c232f8-faa4-40cd-9e7a-07335ff80a31"
+        },
+        {
+            "source": "relu1",
+            "target": "SummationModule_52c232f8-faa4-40cd-9e7a-07335ff80a31"
+        },
+        {
+            "source": "conv2",
+            "target": "relu2"
+        },
+        {
+            "source": "relu2",
+            "target": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "OutputModule"
+        },
+        {
+            "source": "Conv211_cd98967a-7b23-47d4-bc34-aab9300d54e3",
+            "target": "ConvBack_ae4f54b1-dcd0-422c-9967-44df2d2ab8c6"
+        },
+        {
+            "source": "ConvBack_ae4f54b1-dcd0-422c-9967-44df2d2ab8c6",
+            "target": "relu1"
+        },
+        {
+            "source": "SummationModule_52c232f8-faa4-40cd-9e7a-07335ff80a31",
+            "target": "conv2"
+        }
+    ]
+}

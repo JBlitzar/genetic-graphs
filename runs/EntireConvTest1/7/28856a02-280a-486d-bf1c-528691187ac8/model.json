@@ -1,0 +1,77 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvSandwichQuadruple",
+            "id": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "module_type": "ConvDown",
+            "id": "ConvDown_c18b0fff-08b9-4690-88a5-e3825a3a5bbb"
+        },
+        {
+            "module_type": "ConvTranspose",
+            "id": "ConvTranspose_a9debe39-8f59-4567-ac6e-a6c9e1ada3b4"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "ConvDown_c18b0fff-08b9-4690-88a5-e3825a3a5bbb"
+        },
+        {
+            "source": "relu2",
+            "target": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "OutputModule"
+        },
+        {
+            "source": "ConvDown_c18b0fff-08b9-4690-88a5-e3825a3a5bbb",
+            "target": "ConvTranspose_a9debe39-8f59-4567-ac6e-a6c9e1ada3b4"
+        },
+        {
+            "source": "ConvTranspose_a9debe39-8f59-4567-ac6e-a6c9e1ada3b4",
+            "target": "relu2"
+        }
+    ]
+}

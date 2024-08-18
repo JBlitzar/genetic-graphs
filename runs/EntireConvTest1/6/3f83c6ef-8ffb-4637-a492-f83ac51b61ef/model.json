@@ -1,0 +1,77 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvSandwichQuadruple",
+            "id": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "module_type": "DeeperConv",
+            "id": "DeeperConv_c514aab9-ffdd-4bf2-ba61-08806af62b4e"
+        },
+        {
+            "module_type": "ConvBackUpsample",
+            "id": "ConvBackUpsample_3399857a-7b67-4c61-b22b-b5ebfb9686b1"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "DeeperConv_c514aab9-ffdd-4bf2-ba61-08806af62b4e"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "relu2"
+        },
+        {
+            "source": "relu2",
+            "target": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "OutputModule"
+        },
+        {
+            "source": "DeeperConv_c514aab9-ffdd-4bf2-ba61-08806af62b4e",
+            "target": "ConvBackUpsample_3399857a-7b67-4c61-b22b-b5ebfb9686b1"
+        },
+        {
+            "source": "ConvBackUpsample_3399857a-7b67-4c61-b22b-b5ebfb9686b1",
+            "target": "conv1"
+        }
+    ]
+}

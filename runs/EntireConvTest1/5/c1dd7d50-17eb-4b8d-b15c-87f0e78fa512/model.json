@@ -1,0 +1,93 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "DeeperConv",
+            "id": "DeeperConv_4d277059-9d19-4173-934b-1a7f6eceeec2"
+        },
+        {
+            "module_type": "ConvBackUpsample",
+            "id": "ConvBackUpsample_c512e671-fefc-4b20-8c78-540bf86267c2"
+        },
+        {
+            "module_type": "ConvSandwich",
+            "id": "ConvSandwich_1875e60d-9c1f-410a-85cd-0e0a7cac9495"
+        },
+        {
+            "module_type": "DeeperConv",
+            "id": "DeeperConv_4ebda172-db4f-41b4-a724-eca150501dc4"
+        },
+        {
+            "module_type": "ConvBackUpsample",
+            "id": "ConvBackUpsample_b4a8ccb8-c355-4249-9d29-d1bd93a68cd5"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "ConvSandwich_1875e60d-9c1f-410a-85cd-0e0a7cac9495"
+        },
+        {
+            "source": "conv2",
+            "target": "DeeperConv_4ebda172-db4f-41b4-a724-eca150501dc4"
+        },
+        {
+            "source": "relu2",
+            "target": "OutputModule"
+        },
+        {
+            "source": "DeeperConv_4d277059-9d19-4173-934b-1a7f6eceeec2",
+            "target": "ConvBackUpsample_c512e671-fefc-4b20-8c78-540bf86267c2"
+        },
+        {
+            "source": "ConvBackUpsample_c512e671-fefc-4b20-8c78-540bf86267c2",
+            "target": "relu2"
+        },
+        {
+            "source": "ConvSandwich_1875e60d-9c1f-410a-85cd-0e0a7cac9495",
+            "target": "conv2"
+        },
+        {
+            "source": "DeeperConv_4ebda172-db4f-41b4-a724-eca150501dc4",
+            "target": "ConvBackUpsample_b4a8ccb8-c355-4249-9d29-d1bd93a68cd5"
+        },
+        {
+            "source": "ConvBackUpsample_b4a8ccb8-c355-4249-9d29-d1bd93a68cd5",
+            "target": "DeeperConv_4d277059-9d19-4173-934b-1a7f6eceeec2"
+        }
+    ]
+}

@@ -1,0 +1,93 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvSandwichQuadruple",
+            "id": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "module_type": "MaxPool",
+            "id": "MaxPool_0f2d5544-61cd-4c9c-8723-32e71fd7b11d"
+        },
+        {
+            "module_type": "Upsample",
+            "id": "Upsample_7ed3e650-7943-4d6d-99c8-067b9f507210"
+        },
+        {
+            "module_type": "Conv211",
+            "id": "Conv211_c799aee2-e2d6-493c-a95f-60c12a61cd82"
+        },
+        {
+            "module_type": "ConvBack",
+            "id": "ConvBack_85ed8ce5-e3c0-43f6-811f-18006f07376b"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "Conv211_c799aee2-e2d6-493c-a95f-60c12a61cd82"
+        },
+        {
+            "source": "relu2",
+            "target": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "MaxPool_0f2d5544-61cd-4c9c-8723-32e71fd7b11d"
+        },
+        {
+            "source": "MaxPool_0f2d5544-61cd-4c9c-8723-32e71fd7b11d",
+            "target": "Upsample_7ed3e650-7943-4d6d-99c8-067b9f507210"
+        },
+        {
+            "source": "Upsample_7ed3e650-7943-4d6d-99c8-067b9f507210",
+            "target": "OutputModule"
+        },
+        {
+            "source": "Conv211_c799aee2-e2d6-493c-a95f-60c12a61cd82",
+            "target": "ConvBack_85ed8ce5-e3c0-43f6-811f-18006f07376b"
+        },
+        {
+            "source": "ConvBack_85ed8ce5-e3c0-43f6-811f-18006f07376b",
+            "target": "relu2"
+        }
+    ]
+}

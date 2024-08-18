@@ -1,0 +1,69 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "Conv211",
+            "id": "Conv211_bccbe875-de90-4dda-8f1b-b928cc51fa9f"
+        },
+        {
+            "module_type": "ConvBack",
+            "id": "ConvBack_e59e42d2-36af-4fa9-9ee0-c1fa1dfd677c"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "relu2"
+        },
+        {
+            "source": "relu2",
+            "target": "Conv211_bccbe875-de90-4dda-8f1b-b928cc51fa9f"
+        },
+        {
+            "source": "Conv211_bccbe875-de90-4dda-8f1b-b928cc51fa9f",
+            "target": "ConvBack_e59e42d2-36af-4fa9-9ee0-c1fa1dfd677c"
+        },
+        {
+            "source": "ConvBack_e59e42d2-36af-4fa9-9ee0-c1fa1dfd677c",
+            "target": "OutputModule"
+        }
+    ]
+}

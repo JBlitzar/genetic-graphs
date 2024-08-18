@@ -1,0 +1,85 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvDown",
+            "id": "ConvDown_604d1406-4a0a-4b93-95c1-088ee122e3f6"
+        },
+        {
+            "module_type": "ConvTranspose",
+            "id": "ConvTranspose_82a78a69-c8cf-42cb-8e32-03fd95e666fe"
+        },
+        {
+            "module_type": "ConvDown",
+            "id": "ConvDown_81a3aafe-e9c8-42b4-ba62-5a77d568780f"
+        },
+        {
+            "module_type": "ConvTranspose",
+            "id": "ConvTranspose_32d1b73f-7357-4d38-9b40-2d0806afffea"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "ConvDown_604d1406-4a0a-4b93-95c1-088ee122e3f6"
+        },
+        {
+            "source": "relu2",
+            "target": "OutputModule"
+        },
+        {
+            "source": "ConvDown_604d1406-4a0a-4b93-95c1-088ee122e3f6",
+            "target": "ConvTranspose_82a78a69-c8cf-42cb-8e32-03fd95e666fe"
+        },
+        {
+            "source": "ConvTranspose_82a78a69-c8cf-42cb-8e32-03fd95e666fe",
+            "target": "ConvDown_81a3aafe-e9c8-42b4-ba62-5a77d568780f"
+        },
+        {
+            "source": "ConvDown_81a3aafe-e9c8-42b4-ba62-5a77d568780f",
+            "target": "ConvTranspose_32d1b73f-7357-4d38-9b40-2d0806afffea"
+        },
+        {
+            "source": "ConvTranspose_32d1b73f-7357-4d38-9b40-2d0806afffea",
+            "target": "relu2"
+        }
+    ]
+}

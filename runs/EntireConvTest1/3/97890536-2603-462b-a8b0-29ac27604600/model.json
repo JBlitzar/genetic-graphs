@@ -1,0 +1,77 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvSandwichQuadruple",
+            "id": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "module_type": "DeeperConv",
+            "id": "DeeperConv_47547da6-b77f-494d-a853-448bf9bd62db"
+        },
+        {
+            "module_type": "ConvBackUpsample",
+            "id": "ConvBackUpsample_c4589e5b-96aa-41df-a183-0d3b7bff241c"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "DeeperConv_47547da6-b77f-494d-a853-448bf9bd62db"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "relu2"
+        },
+        {
+            "source": "relu2",
+            "target": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "OutputModule"
+        },
+        {
+            "source": "DeeperConv_47547da6-b77f-494d-a853-448bf9bd62db",
+            "target": "ConvBackUpsample_c4589e5b-96aa-41df-a183-0d3b7bff241c"
+        },
+        {
+            "source": "ConvBackUpsample_c4589e5b-96aa-41df-a183-0d3b7bff241c",
+            "target": "relu1"
+        }
+    ]
+}

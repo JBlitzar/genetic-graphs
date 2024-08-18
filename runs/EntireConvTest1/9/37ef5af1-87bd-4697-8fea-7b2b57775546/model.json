@@ -1,0 +1,89 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "ConvSandwichQuadruple",
+            "id": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "module_type": "SELU",
+            "id": "SELU_04e6d67e-6891-4dd1-b119-d26f6aad1c2b"
+        },
+        {
+            "module_type": "Tanh",
+            "id": "Tanh_c017d30e-e0b1-498f-a005-e4a688be0ae1"
+        },
+        {
+            "module_type": "SummationModule",
+            "id": "SummationModule_9c72789e-5614-44c3-8cfb-49377c915420"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "relu2"
+        },
+        {
+            "source": "relu2",
+            "target": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "Tanh_c017d30e-e0b1-498f-a005-e4a688be0ae1"
+        },
+        {
+            "source": "ConvSandwichQuadruple_9862e0d7-bd5c-462d-9fd5-8f3de9e3fb95",
+            "target": "SummationModule_9c72789e-5614-44c3-8cfb-49377c915420"
+        },
+        {
+            "source": "SELU_04e6d67e-6891-4dd1-b119-d26f6aad1c2b",
+            "target": "OutputModule"
+        },
+        {
+            "source": "Tanh_c017d30e-e0b1-498f-a005-e4a688be0ae1",
+            "target": "SummationModule_9c72789e-5614-44c3-8cfb-49377c915420"
+        },
+        {
+            "source": "SummationModule_9c72789e-5614-44c3-8cfb-49377c915420",
+            "target": "SELU_04e6d67e-6891-4dd1-b119-d26f6aad1c2b"
+        }
+    ]
+}
