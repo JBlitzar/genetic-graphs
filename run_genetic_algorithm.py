@@ -92,9 +92,11 @@ class GeneticAlgorithmTrainer:
 
     def get_scores(self,generation):
         scores = []
+        uids = []
         os.mkdir(f"runs/{generation}")
         for individual in self.population:
             uid = str(uuid.uuid4())
+            uids.append(uid)
             
             os.mkdir(f"runs/{generation}/{uid}")
             with open(f"runs/{generation}/{uid}/model.json", "w+") as f:
@@ -104,17 +106,18 @@ class GeneticAlgorithmTrainer:
             individual_model.to("mps")
             val_loss = train_model(individual_model, subdir=f"{generation}/{uid}")
             scores.append(val_loss)
-        return scores
+        return scores,uids
 
     def select_parents(self,generation):
-
-        fitness_scores = np.array(self.get_scores(generation))
+        a, uids = self.get_scores(generation)
+        fitness_scores = np.array(a)
+        real_scores = np.copy(fitness_scores)
         fitness_scores = 1 - fitness_scores
         fitness_scores = fitness_scores - np.min(fitness_scores) + 1e-10
         probabilities = fitness_scores / np.sum(fitness_scores)
         indices = np.random.choice(range(self.population_size), size=self.population_size, p=probabilities)
 
-        return [self.population[i] for i in indices], fitness_scores
+        return [self.population[i] for i in indices], fitness_scores,real_scores, uids
 
 
     def mutate_population(self):
@@ -124,10 +127,14 @@ class GeneticAlgorithmTrainer:
         self.initialize_population()
         for generation in trange(self.generations):
             print(f"Generation {generation + 1}")
-            self.population, scores = self.select_parents(generation)
+            self.population, scores,rscores,uids = self.select_parents(generation)
             self.mutate_population()
+            
 
-            print(f"Best individual fitness: {max(scores)}")
+            msg = f"Best individual fitness: {np.max(rscores)} ({np.max(scores)}) ({uids[np.argmax(rscores)]}) | Average fitness: {np.mean(rscores)} ({np.mean(scores)})"
+            print(msg)
+            with open(f"runs/{generation}/best.txt", "w+") as f:
+                f.write(msg)
         
     
 if __name__ == "__main__":
