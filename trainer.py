@@ -31,7 +31,7 @@ class LightningTrainer(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        print(x.size())
+        #print(x.size())
         logits = self(x)
         logits = torch.stack(logits) if type(logits) == type([]) else logits
         logits = logits.squeeze(0)

@@ -26,15 +26,15 @@ class MNISTModuleDagWrapper(nn.Module):
 
     def forward(self,x):
         x = torch.Tensor(x)
-        print(x.size())
+        #print(x.size())
         d = self.dag(x)
-        print(len(d))
+        #print(len(d))
         ds = torch.stack(d)
         ds = ds.squeeze(0)
-        print(ds.size())
-        print("^^^ d")
+        #print(ds.size())
+        #print("^^^ d")
         z = self.block(torch.squeeze(ds))
-        print(z.size())
+        #print(z.size())
         return z
     
     def serialize_to_json(self):
