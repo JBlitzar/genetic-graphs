@@ -38,8 +38,8 @@ print("Final Output:", output)
 plt.close()
 
 mutate(mg,"skip")
-for i in range(100):
-    mutate(mg)
+for i in range(10):
+    mg = mutate(mg)
     #mg.display()
     mg.validate_graph()
 

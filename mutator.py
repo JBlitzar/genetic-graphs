@@ -5,6 +5,7 @@ from typing import Tuple, Union
 import random
 import uuid
 import networkx as nx
+from copy import deepcopy
 
 
 def get_classes():
@@ -41,6 +42,7 @@ def rand_of_transform(transform: Union[Tuple[int,int,int],str]):
 
 
 def mutate(dag: ModuleDag,mtype:Union[str,None]=None):
+    dag = deepcopy(dag)
     mutation_possibilities = ["sameTransformation","skip","downup","smallbig","inout","cull","replaceSame","noop"]
 
     mutationType = random.choice(mutation_possibilities)
@@ -174,7 +176,20 @@ def mutate(dag: ModuleDag,mtype:Union[str,None]=None):
                 pass
         dag.propogate_shapes()
         print("Just mutated", mutationType)
-    mutateFromType(mutationType)
+
+
+    ogdag = deepcopy(dag)
+    i = 0
+    while i < 1000:
+        try:
+            
+            mutateFromType(mutationType)
+            dag.validate_graph()
+            break
+        except:
+            i += 1
+            dag = deepcopy(ogdag)
+    return dag
 
 
 
