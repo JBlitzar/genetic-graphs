@@ -128,7 +128,7 @@ def get_block_seed():
     mg.validate_graph()
     return MNISTBlockModuleDagWrapper(mg,input_size=(64,1,28,28),output_size=10)
 def get_seed():
-    mg = ModuleDag("TestNet", input_size=(64,1,28,28))
+    mg = ModuleDag("TestNet", input_size=(64,1,28,28),output_size=(64,1,28,28))
     inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))
     inputmod.setShape((64,1,28,28))
     inputmod.init_block()
@@ -221,6 +221,6 @@ class GeneticAlgorithmTrainer:
         
     
 if __name__ == "__main__":
-    trainer = GeneticAlgorithmTrainer(10,10,1,get_block_seed)
+    trainer = GeneticAlgorithmTrainer(20,100,1,get_seed)
     trainer.run()
 
