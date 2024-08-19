@@ -1,5 +1,5 @@
 from moduledag import ModuleDag,ImageModule
-from modules  import SimpleConv,ReLU,Module
+from modules  import SimpleConv,ReLU,Module,ConvDown
 from mutator import mutate
 from trainer import train_model
 import torch
@@ -10,7 +10,13 @@ import os
 import torch.nn as nn
 import numpy as np
 import os
+from copy import deepcopy
 os.system(f"caffeinate -is -w {os.getpid()} &")
+
+
+def multTuples(ta,tb):
+    return tuple(a * b for a, b in zip(ta, tb))
+
 
 
 class MNISTModuleDagWrapper(nn.Module):
@@ -42,8 +48,81 @@ class MNISTModuleDagWrapper(nn.Module):
     
     def mutate(self):
         return self.__class__(mutate(self.dag),input_size=self.input_size,output_size=self.output_size)
+    
+class MNISTBlockModuleDagWrapper(nn.Module):
+    def __init__(self,dag,input_size,output_size,num_blocks=2):
+        super().__init__()
+
+        self.num_blocks = num_blocks
+
+        self.dag = dag
 
 
+        self.dags = []
+        final_outsize = multTuples(input_size,1/(2**num_blocks))
+        for i in range(num_blocks):
+            ndag = deepcopy(dag)
+            ndag.input_size = multTuples(input_size,1/(2**i))
+            ndag.output_size = multTuples(input_size,1/(2**(i+1)))
+            ndag.modules["InputModule"].setShape(multTuples(input_size,1/(2**i)))
+
+
+
+            self.dags.append(ndag)
+
+        self.dagblock = nn.Sequential(*self.dags)
+        self.block = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(final_outsize,output_size),
+
+        )
+        self.input_size = input_size
+        self.output_size = output_size
+        self.num_blocks = num_blocks
+
+    def forward(self,x):
+        x = torch.Tensor(x)
+        #print(x.size())
+        d = self.dagblock(x)
+        #print(len(d))
+        ds = torch.stack(d)
+        ds = ds.squeeze(0)
+        #print(ds.size())
+        #print("^^^ d")
+        z = self.block(torch.squeeze(ds))
+        #print(z.size())
+        return z
+    
+    def serialize_to_json(self):
+        return self.dag.serialize_to_json()
+    
+    def mutate(self):
+        return self.__class__(mutate(self.dag),input_size=self.input_size,output_size=self.output_size,num_blocks=num_blocks)
+
+
+def get_block_seed():
+    mg = ModuleDag("TestNet", input_size=(64,1,28,28),output_size=(64,1,14,14))
+    inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))
+    inputmod.setShape((64,1,28,28))
+    inputmod.init_block()
+    mg.add_module(inputmod)
+    mg.add_module(SimpleConv("conv1"))
+    mg.add_module(ReLU("relu1"))
+    mg.add_module(ConvDown("convdown"))
+    mg.add_module(ReLU("relu2"))
+    mg.add_module(Module("OutputModule", num_inputs=1, num_outputs=1))
+
+
+    mg.add_connection("InputModule", "conv1")
+
+    mg.add_connection("conv1", "relu1")
+    mg.add_connection("relu1", "convdown")
+    mg.add_connection("convdown", "relu2")
+    mg.add_connection("relu2", "OutputModule")
+
+
+    mg.validate_graph()
+    return MNISTBlockModuleDagWrapper(mg,input_size=(64,1,28,28),output_size=10)
 def get_seed():
     mg = ModuleDag("TestNet", input_size=(64,1,28,28))
     inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))

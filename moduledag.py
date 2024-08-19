@@ -5,6 +5,7 @@ import torch
 import random
 import inspect
 from display import display_graph
+from typing import Union, Tuple
 
 class FunctionalToClass(nn.Module):
     def __init__(self, function, *args, **kwargs) -> None:
@@ -177,7 +178,7 @@ class CombinationModule(Module):
 
 
 class ModuleDag(Module):
-    def __init__(self, name, input_size: tuple):
+    def __init__(self, name, input_size: tuple,output_size: Union[Tuple,None]):
         super().__init__(name, 1,1)
         self.name = name
         self.num_inputs = 1
@@ -185,6 +186,10 @@ class ModuleDag(Module):
         self.input_connections = 0
         self.output_connections = 0
         self.input_size = input_size
+
+        self.output_size = output_size
+        if self.output_size == None:
+            self.output_size = input_size
 
         self.graph = nx.DiGraph()
         self.modules_moduledag = nn.ModuleDict()
@@ -281,9 +286,10 @@ class ModuleDag(Module):
             result = torch.stack(result) if type(result) == type([]) else result
             result = result.squeeze(0)
             try:
-                assert tuple(result.size()) == self.input_size
+                assert tuple(result.size()) == self.output_size
+
             except AssertionError:
-                print(result.size(), self.input_size)
+                print(result.size(), self.output_size)
                 print("^ validate sizes")
                 raise AssertionError # re-raise
 
