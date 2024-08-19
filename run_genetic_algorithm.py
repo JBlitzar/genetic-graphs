@@ -14,8 +14,8 @@ from copy import deepcopy
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-def multTuples(ta,tb):
-    return tuple(a * b for a, b in zip(ta, tb))
+def multTuple(ta,b):
+    return ta[0],ta[1],int(ta[2]*b),int(ta[3]*b)
 
 
 
@@ -59,18 +59,19 @@ class MNISTBlockModuleDagWrapper(nn.Module):
 
 
         self.dags = []
-        final_outsize = multTuples(input_size,1/(2**num_blocks))
+        final_outsize = multTuple(input_size,1/(2**num_blocks))
+        final_outsize = final_outsize[-2] * final_outsize[-1]
         for i in range(num_blocks):
             ndag = deepcopy(dag)
-            ndag.input_size = multTuples(input_size,1/(2**i))
-            ndag.output_size = multTuples(input_size,1/(2**(i+1)))
-            ndag.modules["InputModule"].setShape(multTuples(input_size,1/(2**i)))
+            ndag.input_size = multTuple(input_size,1/(2**i))
+            ndag.output_size = multTuple(input_size,1/(2**(i+1)))
+            ndag.modules_moduledag["InputModule"].setShape(multTuple(input_size,1/(2**i)))
 
 
 
             self.dags.append(ndag)
 
-        self.dagblock = nn.Sequential(*self.dags)
+        self.dagblock = nn.ModuleList(self.dags)
         self.block = nn.Sequential(
             nn.Flatten(),
             nn.Linear(final_outsize,output_size),
@@ -83,7 +84,10 @@ class MNISTBlockModuleDagWrapper(nn.Module):
     def forward(self,x):
         x = torch.Tensor(x)
         #print(x.size())
-        d = self.dagblock(x)
+
+        d = x
+        for a in self.dagblock:
+            d = a(d)
         #print(len(d))
         ds = torch.stack(d)
         ds = ds.squeeze(0)
@@ -97,7 +101,7 @@ class MNISTBlockModuleDagWrapper(nn.Module):
         return self.dag.serialize_to_json()
     
     def mutate(self):
-        return self.__class__(mutate(self.dag),input_size=self.input_size,output_size=self.output_size,num_blocks=num_blocks)
+        return self.__class__(mutate(self.dag),input_size=self.input_size,output_size=self.output_size,num_blocks=self.num_blocks)
 
 
 def get_block_seed():
@@ -217,6 +221,6 @@ class GeneticAlgorithmTrainer:
         
     
 if __name__ == "__main__":
-    trainer = GeneticAlgorithmTrainer(10,10,1,get_seed)
+    trainer = GeneticAlgorithmTrainer(1,10,1,get_block_seed)
     trainer.run()
 
