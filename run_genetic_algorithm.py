@@ -68,7 +68,7 @@ class MNISTBlockModuleDagWrapper(nn.Module):
             ndag.modules_moduledag["InputModule"].setShape(multTuple(input_size,1/(2**i)))
 
 
-
+            self.add_module(f"dag_{i}", ndag)
             self.dags.append(ndag)
 
         self.dagblock = nn.ModuleList(self.dags)
@@ -221,6 +221,6 @@ class GeneticAlgorithmTrainer:
         
     
 if __name__ == "__main__":
-    trainer = GeneticAlgorithmTrainer(1,10,1,get_block_seed)
+    trainer = GeneticAlgorithmTrainer(10,10,1,get_block_seed)
     trainer.run()
 

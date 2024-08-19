@@ -61,7 +61,7 @@ class LightningTrainer(pl.LightningModule):
     def get_val_loss(self):
         return self.trainer.callback_metrics.get('avg_val_loss').item()
 
-def train_model(model, epochs=1,subdir="test"):
+def train_model(model, epochs=5,subdir="test"):
     transform = transforms.Compose([
         transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)),
 
