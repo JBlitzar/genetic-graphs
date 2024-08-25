@@ -43,7 +43,7 @@ def rand_of_transform(transform: Union[Tuple[int,int,int],str]):
 
 def mutate(dag: ModuleDag,mtype:Union[str,None]=None):
     dag = deepcopy(dag)
-    mutation_possibilities = ["sameTransformation","skip","downup","smallbig","inout","cull","replaceSame","noop"]
+    mutation_possibilities = ["sameTransformation","skip","downup","smallbig","inout","cull","replaceSame","noop","unskip","undownup","unsmallbig","uninout"]
 
     mutationType = random.choice(mutation_possibilities)
     if mtype is not None:
@@ -174,6 +174,133 @@ def mutate(dag: ModuleDag,mtype:Union[str,None]=None):
                 dag.replace_node(n.name, rand_of_transform(n.shape_transform))
             case "noop":
                 pass
+
+            case "unskip":
+                connector = None
+                candidate = None
+                candidate_2 = None
+
+
+                for node in dag.graph.nodes:
+                    if node.shapeTransform == "comb":
+                        connector = node
+                        predecessors = list(dag.graph.predecessors(node.name))
+                        if len(predecessors) == 2:
+                            candidate = predecessors[1]
+                            candidate_2 = list(dag.graph.successors(node.name))[0]
+                            break
+
+                if connector is None or candidate is None or candidate_2 is None:
+                    raise ValueError("No valid skip operation to undo.")
+
+                pred_ref = list(dag.graph.predecessors(connector.name))[0]
+
+                dag.remove_connection(candidate.name, connector.name)
+                dag.remove_connection(connector.name, candidate_2.name)
+                dag.remove_connection(pred_ref, connector.name)
+                dag.add_connection(pred_ref, candidate_2.name)
+                dag.remove_module(connector.name)
+
+            case "unsmallbig":
+                flag = False
+                for u, v in dag.graph.edges:
+
+                    if dag.graph.out_degree(u) == 1 and dag.graph.in_degree(v) == 1:
+
+                        middle_node = list(dag.graph.successors(u))[0]
+                        if (hasattr(middle_node, 'shape_transform') and
+                            dag.graph.out_degree(middle_node) == 1 and
+                            dag.graph.in_degree(middle_node) == 1):
+                            
+                            next_node = list(dag.graph.successors(middle_node))[0]
+                            if (hasattr(next_node, 'shape_transform') and
+                                dag.graph.out_degree(next_node) == 1 and
+                                dag.graph.in_degree(next_node) == 1):
+                                
+
+                                if middle_node.shape_transform == (1, 0.5, 0.5) and next_node.shape_transform == (1, 2, 2):
+
+                                    dag.remove_connection(u, middle_node.name)
+                                    dag.remove_connection(middle_node.name, next_node.name)
+                                    dag.remove_connection(next_node.name, v)
+
+                                    dag.add_connection(u, v)
+
+                                    dag.remove_module(middle_node.name)
+                                    dag.remove_module(next_node.name)
+
+                                    print("unsmallbig performed successfully")
+                                    flag = True
+                                    break
+                if not flag:
+                    raise ValueError("No valid smallbig operation to undo.")
+            case "uninout":
+                flag = False
+                for u, v in dag.graph.edges:
+
+                    if dag.graph.out_degree(u) == 1 and dag.graph.in_degree(v) == 1:
+
+                        middle_node = list(dag.graph.successors(u))[0]
+                        if (hasattr(middle_node, 'shape_transform') and
+                            dag.graph.out_degree(middle_node) == 1 and
+                            dag.graph.in_degree(middle_node) == 1):
+                            
+                            next_node = list(dag.graph.successors(middle_node))[0]
+                            if (hasattr(next_node, 'shape_transform') and
+                                dag.graph.out_degree(next_node) == 1 and
+                                dag.graph.in_degree(next_node) == 1):
+                                
+
+                                if middle_node.shape_transform == (2, 1, 1) and next_node.shape_transform == (0.5, 1, 1):
+
+                                    dag.remove_connection(u, middle_node.name)
+                                    dag.remove_connection(middle_node.name, next_node.name)
+                                    dag.remove_connection(next_node.name, v)
+
+                                    dag.add_connection(u, v)
+
+                                    dag.remove_module(middle_node.name)
+                                    dag.remove_module(next_node.name)
+
+                                    print("unsmallbig performed successfully")
+                                    flag = True
+                                    break
+                if not flag:
+                    raise ValueError("No valid smallbig operation to undo.")
+            case "undownup":
+                flag = False
+                for u, v in dag.graph.edges:
+
+                    if dag.graph.out_degree(u) == 1 and dag.graph.in_degree(v) == 1:
+
+                        middle_node = list(dag.graph.successors(u))[0]
+                        if (hasattr(middle_node, 'shape_transform') and
+                            dag.graph.out_degree(middle_node) == 1 and
+                            dag.graph.in_degree(middle_node) == 1):
+                            
+                            next_node = list(dag.graph.successors(middle_node))[0]
+                            if (hasattr(next_node, 'shape_transform') and
+                                dag.graph.out_degree(next_node) == 1 and
+                                dag.graph.in_degree(next_node) == 1):
+                                
+
+                                if middle_node.shape_transform == (2, 0.5, 0.5) and next_node.shape_transform == (0.5, 2, 2):
+
+                                    dag.remove_connection(u, middle_node.name)
+                                    dag.remove_connection(middle_node.name, next_node.name)
+                                    dag.remove_connection(next_node.name, v)
+
+                                    dag.add_connection(u, v)
+
+                                    dag.remove_module(middle_node.name)
+                                    dag.remove_module(next_node.name)
+
+                                    print("unsmallbig performed successfully")
+                                    flag = True
+                                    break
+                if not flag:
+                    raise ValueError("No valid smallbig operation to undo.")
+            
         dag.propogate_shapes()
         print("Just mutated", mutationType)
 

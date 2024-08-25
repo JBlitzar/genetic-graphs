@@ -4,7 +4,7 @@ import torch
 from mutator import mutate
 import matplotlib.pyplot as plt
 
-mg = ModuleDag("TestNet", input_size=(1,1,28,28))
+mg = ModuleDag("TestNet", input_size=(1,1,28,28),output_size=(1,28,28))
 inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))
 inputmod.setShape((1,1,28,28))
 inputmod.init_block()
