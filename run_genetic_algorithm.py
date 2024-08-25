@@ -1,5 +1,5 @@
 from moduledag import ModuleDag,ImageModule
-from modules  import SimpleConv,ReLU,Module,ConvDown
+from modules  import *
 from mutator import mutate
 from trainer import train_model
 import torch
@@ -11,6 +11,7 @@ import torch.nn as nn
 import numpy as np
 import os
 from copy import deepcopy
+from display import save_graph
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
@@ -151,6 +152,40 @@ def get_seed():
     mg.validate_graph()
     return MNISTModuleDagWrapper(mg,input_size=28*28,output_size=10)
 
+def get_down_seed():
+    mg = ModuleDag("TestNet", input_size=(64,1,28,28),output_size=(64,4,7,7))
+    inputmod = ImageModule("InputModule",shapeTransform=(1,1,1))
+    inputmod.setShape((64,1,28,28))
+    inputmod.init_block()
+    mg.add_module(inputmod)
+    mg.add_module(SimpleConv("conv1"))
+    mg.add_module(ConvDown("cd1"))
+    mg.add_module(Conv211("c21"))
+    mg.add_module(ReLU("relu1"))
+    
+    mg.add_module(SimpleConv("conv2"))
+    mg.add_module(ConvDown("cd2"))
+    mg.add_module(Conv211("c22"))
+    mg.add_module(ReLU("relu2"))
+    mg.add_module(Module("OutputModule", num_inputs=1, num_outputs=1))
+
+
+    mg.add_connection("InputModule", "conv1")
+
+    mg.add_connection("conv1", "cd1")
+    mg.add_connection("cd1", "c21")
+    mg.add_connection("c21", "relu1")
+    mg.add_connection("relu1", "conv2")
+    mg.add_connection("conv2", "cd2")
+    mg.add_connection("cd2", "c22")
+    mg.add_connection("c22", "relu2")
+    
+    mg.add_connection("relu2", "OutputModule")
+
+
+    mg.validate_graph()
+    return MNISTModuleDagWrapper(mg,input_size=4*7*7,output_size=10)
+
 
 class GeneticAlgorithmTrainer:
     def __init__(self, population_size, generations, mutations_per_generation, get_seed):
@@ -184,6 +219,8 @@ class GeneticAlgorithmTrainer:
             os.mkdir(f"runs/{generation}/{uid}")
             with open(f"runs/{generation}/{uid}/model.json", "w+") as f:
                 f.write(individual.serialize_to_json())
+
+            save_graph(individual.dag.graph, f"runs/{generation}/{uid}/graph.png")
             
             individual_model = individual#torch.compile(individual)
             individual_model.to("mps")
@@ -191,7 +228,7 @@ class GeneticAlgorithmTrainer:
             scores.append(val_loss)
         return scores,uids
 
-    def select_parents(self,generation):
+    def select_parents(self,generation): # From chatgpt and you can tell
         a, uids = self.get_scores(generation)
         fitness_scores = np.array(a)
         real_scores = np.copy(fitness_scores)
@@ -221,6 +258,6 @@ class GeneticAlgorithmTrainer:
         
     
 if __name__ == "__main__":
-    trainer = GeneticAlgorithmTrainer(20,100,1,get_seed)
+    trainer = GeneticAlgorithmTrainer(10,10,1,get_down_seed)
     trainer.run()
 
