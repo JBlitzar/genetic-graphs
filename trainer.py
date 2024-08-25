@@ -7,6 +7,9 @@ from torch.utils.data import random_split, DataLoader
 import os
 from pytorch_lightning.loggers import TensorBoardLogger
 
+
+# From the docs basically
+
 class LightningTrainer(pl.LightningModule):
     def __init__(self, model, train_loader, val_loader=None, lr=1e-3):
         super(LightningTrainer, self).__init__()

@@ -7,6 +7,7 @@ import inspect
 from display import display_graph
 from typing import Union, Tuple
 
+
 class FunctionalToClass(nn.Module):
     def __init__(self, function, *args, **kwargs) -> None:
         self.function = function
