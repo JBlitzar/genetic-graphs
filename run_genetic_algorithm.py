@@ -231,7 +231,7 @@ class GeneticAlgorithmTrainer:
             individual_model = individual#torch.compile(individual)
             individual_model.to("mps")
             val_loss, val_acc = train_model(individual_model, subdir=f"{generation}/{uid}")
-            scores.append(val_acc)
+            scores.append(val_acc.item())
         return scores,uids
 
     def select_parents(self,generation): # From chatgpt and you can tell
