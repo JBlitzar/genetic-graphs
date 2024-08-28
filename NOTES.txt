@@ -1,10 +1,11 @@
-Optimizing for more parameters -- Penalize large parameter counts.
-
-Make it so that mutations dont reliably increase parameter count, and just make super big networks
+Improvement: input model and permute genetically?
 
 
-One output layer should be fine
+let it run, look through variations, 
 
-do it in repeating "blocks", how most convs are structured
 
-Other benchmarks like autoencoder
+visualize:
+put in a window all the current generation, put validation accuracy
+
+
+Investigate multiprocessing

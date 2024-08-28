@@ -12,6 +12,7 @@ import numpy as np
 import os
 from copy import deepcopy
 from display import save_graph
+from torchinfo import summary
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
@@ -220,6 +221,11 @@ class GeneticAlgorithmTrainer:
             with open(f"runs/{generation}/{uid}/model.json", "w+") as f:
                 f.write(individual.serialize_to_json())
 
+            model_summary = summary(individual, (64,1,28,28)).__str__()
+            with open(f"runs/{generation}/{uid}/summary.txt", "w+") as f:
+                f.write(model_summary)
+
+
             save_graph(individual.dag.graph, f"runs/{generation}/{uid}/graph.png")
             
             individual_model = individual#torch.compile(individual)
@@ -245,6 +251,7 @@ class GeneticAlgorithmTrainer:
 
     def run(self):
         self.initialize_population()
+        self.mutate_population()
         for generation in trange(self.generations):
             print(f"Generation {generation + 1}")
             self.population, scores,rscores,uids = self.select_parents(generation)
