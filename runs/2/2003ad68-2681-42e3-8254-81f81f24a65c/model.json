@@ -1,0 +1,101 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "module_type": "ImageModule",
+            "id": "InputModule"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv1"
+        },
+        {
+            "module_type": "ConvDown",
+            "id": "cd1"
+        },
+        {
+            "module_type": "Conv211",
+            "id": "c21"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu1"
+        },
+        {
+            "module_type": "SimpleConv",
+            "id": "conv2"
+        },
+        {
+            "module_type": "ConvDown",
+            "id": "cd2"
+        },
+        {
+            "module_type": "Conv211",
+            "id": "c22"
+        },
+        {
+            "module_type": "ReLU",
+            "id": "relu2"
+        },
+        {
+            "module_type": "Module",
+            "id": "OutputModule"
+        },
+        {
+            "module_type": "MaxPool",
+            "id": "MaxPool_f522fe5b-c114-4c3b-945a-49ce85b84210"
+        },
+        {
+            "module_type": "Upsample",
+            "id": "Upsample_e77d9396-b679-4633-82ba-05e7b832b4a0"
+        }
+    ],
+    "links": [
+        {
+            "source": "InputModule",
+            "target": "conv1"
+        },
+        {
+            "source": "conv1",
+            "target": "cd1"
+        },
+        {
+            "source": "cd1",
+            "target": "c21"
+        },
+        {
+            "source": "c21",
+            "target": "relu1"
+        },
+        {
+            "source": "relu1",
+            "target": "conv2"
+        },
+        {
+            "source": "conv2",
+            "target": "cd2"
+        },
+        {
+            "source": "cd2",
+            "target": "MaxPool_f522fe5b-c114-4c3b-945a-49ce85b84210"
+        },
+        {
+            "source": "c22",
+            "target": "relu2"
+        },
+        {
+            "source": "relu2",
+            "target": "OutputModule"
+        },
+        {
+            "source": "MaxPool_f522fe5b-c114-4c3b-945a-49ce85b84210",
+            "target": "Upsample_e77d9396-b679-4633-82ba-05e7b832b4a0"
+        },
+        {
+            "source": "Upsample_e77d9396-b679-4633-82ba-05e7b832b4a0",
+            "target": "c22"
+        }
+    ]
+}

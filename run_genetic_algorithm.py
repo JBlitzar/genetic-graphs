@@ -13,6 +13,7 @@ import os
 from copy import deepcopy
 from display import save_graph
 from torchinfo import summary
+from visualize_generation import reInit, onLoop
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
@@ -213,6 +214,7 @@ class GeneticAlgorithmTrainer:
         scores = []
         uids = []
         os.mkdir(f"runs/{generation}")
+        reInit()
         for individual in self.population:
             uid = str(uuid.uuid4())
             uids.append(uid)
@@ -228,10 +230,12 @@ class GeneticAlgorithmTrainer:
 
             save_graph(individual.dag.graph, f"runs/{generation}/{uid}/graph.png")
             
+            
             individual_model = individual#torch.compile(individual)
             individual_model.to("mps")
             val_loss, val_acc = train_model(individual_model, subdir=f"{generation}/{uid}")
             scores.append(val_acc.item())
+            onLoop(f"runs/{generation}/{uid}/graph.png",val_acc.item())
         return scores,uids
 
     def select_parents(self,generation): # From chatgpt and you can tell
