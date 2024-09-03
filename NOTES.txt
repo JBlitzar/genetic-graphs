@@ -6,6 +6,6 @@ let it run, look through variations,
 
 visualize:
 put in a window all the current generation, put validation accuracy
-
+https://www.kaggle.com/competitions/?tagIds=13207
 
 Investigate multiprocessing

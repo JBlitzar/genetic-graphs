@@ -20,6 +20,7 @@ def reInit():
     i = 0
 
 def onLoop(img,value):
+    global i, axes, fig, gs
     
 
     img = Image.open(img)
@@ -38,8 +39,8 @@ def onLoop(img,value):
     
     fig.canvas.draw()  
     fig.canvas.flush_events()
-    
+
     i+= 1
 
 
-    plt.show(False)
+    plt.show(block=False)
