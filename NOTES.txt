@@ -9,3 +9,11 @@ put in a window all the current generation, put validation accuracy
 https://www.kaggle.com/competitions/?tagIds=13207
 
 Investigate multiprocessing
+
+
+
+Revisiting after a bit to clean this up a bit. The current issue is mostly that it tends towards architectures with lots of params. 
+What are improvements?
+ - "block" design: Input, N blocks that are the same, then output layer.
+ - Fitness = validation accuracy - k * log(params).
+- CIFAR as a better benchmark than MNIST. MNIST is too easy, NN slaps a few linear layers on and calls it a day. CIFAR is relatively complicated yet small
